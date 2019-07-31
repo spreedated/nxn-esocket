@@ -1,0 +1,4 @@
+DirectoryIndex nxn.php
+RewriteEngine On 
+RewriteCond %{SERVER_PORT} 82
+RewriteRule ^(.*)$ https://esocket.nxn/$1 [R,L]
