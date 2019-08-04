@@ -19,7 +19,18 @@ const String inetGateway = "192.168.1.254";
 const String inetSubnet = "255.255.255.0";
 
 //Node Pin setup
-const int trasmitterDataPin = 16;
+//D0 = 16
+//D1 = 5
+//D2 = 4
+//D3 = 0
+//D4 = 2
+//D5 = 14
+//D6 = 12
+//D7 = 13
+//D8 = 15
+//RX = 3
+//TX = 1
+const int trasmitterDataPin = 0;
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -60,12 +71,9 @@ RCSwitch nxnSwitch = RCSwitch();
 
 //UDP Listener
 WiFiUDP UDPListener;
-char data[200] ={};
-int packetsize = 0; 
-String receiveddata = "";
 // # ### #
 
-void setup() {
+void setup() { 
   Serial.begin(74880);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
@@ -94,19 +102,20 @@ void setup() {
   //# ### #
 }
 
-void loop() {  
+String readUDPPacket() {
+  char data[200] ={}; 
+  String receiveddata = "";
+  
   int packetsize = UDPListener.available();
   char message = UDPListener.parsePacket();
   
   if (message){
     UDPListener.read(data,packetsize);
      delay(100);
-     //Serial.println(data);
      UDPListener.endPacket();
   }
   
   if(packetsize) {
-      //Serial.println(packetsize);
       for (int i=0;packetsize > i ;i++)
       {
         receiveddata+= (char)data[i];
@@ -114,10 +123,32 @@ void loop() {
         
       Serial.println(receiveddata);
       Serial.println();
-      String homecode = getValue(receiveddata, '#',0);
-      String socket = getValue(receiveddata, '#',1);
-      String onORoff = getValue(receiveddata, '#',2);
-      receiveddata="";
+  }
+  return receiveddata;
+}
+
+void loop() {  
+      String rcvd = readUDPPacket();
+      
+      if(rcvd.startsWith("nxn#") && rcvd.length() > 4){
+        int dividend = getValue(rcvd, '#',1).toInt();
+        int divisor = getValue(rcvd, '#',2).toInt();
+        if(dividend % divisor == 1337) { //nxn#2675#1338
+            Serial.println("Genuine neXn-Systems device.");
+            Serial.println(nodeHostname + " operating on nominal parameters");
+            Serial.println(UDPListener.remoteIP());
+            Serial.println(UDPListener.remotePort());
+            //Answer
+            char  replyPacket[] = "Genuine neXn-Systems device.";
+            UDPListener.beginPacket(UDPListener.remoteIP(), UDPListener.remotePort());
+            UDPListener.write(replyPacket);
+            UDPListener.endPacket();
+          }
+      }
+      
+      String homecode = getValue(rcvd, '#',0);
+      String socket = getValue(rcvd, '#',1);
+      String onORoff = getValue(rcvd, '#',2);
 
       if(socket=="1") {
         socket = "10000";
@@ -142,6 +173,6 @@ void loop() {
         nxnSwitch.switchOn((char*)homecode.c_str(),(char*)socket.c_str());
         Serial.println("ON - " + homecode + " " + socket);
       }
-  }
-  delay(200); //Small delay
+
+      delay(200); //Small delay
 }
