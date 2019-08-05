@@ -11,8 +11,8 @@ const char* ssid = "nxn-fritz";
 const char* password = "69469573606998461850";
 
 //Node Ethernet Information
-const String nodeHostname = "nxn-nodeMCU-107";
-const String nodeIP = "192.168.1.107";
+const String nodeHostname = "nxn-nodeMCU-108";
+const String nodeIP = "192.168.1.108";
 const int nodePort = 13337;
 const String inetDNSServer = "192.168.1.105";
 const String inetGateway = "192.168.1.254";

@@ -7,12 +7,9 @@ from subprocess import Popen
 from subprocess import PIPE
 import sys
 import esocket
+import ConfigParser
 
-# pid = nexn.PID()
-# pid.filename = __file__
-# pid.write_pid_file()
-
-version = '1.6'
+version = '1.8'
 
 UDP_IP_ADDRESS = ''
 UDP_PORT_NO = 0
@@ -24,21 +21,14 @@ log.logfile_location = '/var/log/esocket_listener.log'
 def read_config():
 	global UDP_PORT_NO,INTERFACE
 	try:
-		filepath = str(__file__)
-		filepath = filepath[:filepath.rfind('/')+1]
-		f = open(filepath + 'esocket_listener.config','r')
-		content = f.read()
-		f.close()
 		log.write_log('Reading config...', 'read_config', 'INIT')
-		for line in content.splitlines():
-			if line.find('PORT') >= 1:
-				UDP_PORT_NO = int(line[line.find('=')+1:])
-			if line.find('INTERFACE') >= 1:
-				INTERFACE = int(line[line.find('=')+1:])
+		Config = ConfigParser.ConfigParser()
+		Config.read("config.conf")
+		UDP_PORT_NO = Config.getint('Listener','port')
+		INTERFACE = Config.get('Listener','interface')
 		log.write_log('Config loaded!', 'read_config', 'INIT')
 	except Exception as e:
 		log.write_log('[' + str(e) + ']', 'read_config', 'FATALERROR')
-
 
 def get_own_ip(interface):
 	global UDP_IP_ADDRESS
@@ -71,14 +61,19 @@ if __name__ == "__main__":
 	log.write_log('Started listening on ' + UDP_IP_ADDRESS + ':' + str(UDP_PORT_NO),'MAIN','INIT')
 
 	while True:
-		data, addr = serverSock.recvfrom(1024)
-		if(len(data) > 1):
-			pass
-		else:
+		data, addr = serverSock.recvfrom(4096)
+		if(len(data) < 1):
+			continue
+		if(str(data).startswith('nxn#')):
+			try:
+				dt = data.split('#')
+				if((int(dt[1]) % int(dt[2])) == 1337):
+					serverSock.sendto('Genuine neXn-Systems device.', addr)
+			except Exception as e:
+				print(str(e))
 			continue
 		try:
 			socket = data.split("#")
-			#os.system("/src/raspberry-remote/send " + socket[0] + " " + socket[1] + " " +  socket[2])
 			p = Popen(['/src/raspberry-remote/send',socket[0],socket[1],socket[2]], stdout=PIPE, stderr=PIPE)
 			stdout, stderr = p.communicate()
 			stdout = stdout.replace('\n',' --- ')
