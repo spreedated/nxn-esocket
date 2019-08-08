@@ -2,7 +2,7 @@
 define('_company_','neXn-Systems');
 define('_homepage_','nexn.systems');
 define('_developer_','Markus Karl Wackermann');
-define('_version_','2.10.0');
+define('_version_','2.10.1');
 
 $starttime = microtime(true);
 
@@ -22,7 +22,7 @@ include('functions/login.php');
 <style type="text/css">
 @font-face {
 	font-family: lcars;
-	src: url('font/lcarsgtj3.ttf');
+	src: url('fonts/lcarsgtj3.ttf');
 }
 body {
 	background-color: #000;
@@ -113,6 +113,7 @@ body {
 	display:inline-block;
 	line-height: 64px;
 	font-family: lcars;
+	font-weight: normal;
 }
 #socketnamediv {
 	position:absolute;

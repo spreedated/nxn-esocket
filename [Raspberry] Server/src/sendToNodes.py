@@ -59,7 +59,7 @@ try:
 	# update state
 	#
 	with connection.cursor() as cursor2:
-		cursor2.execute('UPDATE nxn_esocket.sockets SET state='+sys.argv[3]+' WHERE dip_main=' + sys.argv[1] + ' AND dip_second=' + sys.argv[2])
+		cursor2.execute('UPDATE nxn_esocket.sockets SET state='+sys.argv[3]+' WHERE housecode=' + sys.argv[1] + ' AND socketcode=' + sys.argv[2])
 finally:
 	connection.commit()
 	connection.close()
