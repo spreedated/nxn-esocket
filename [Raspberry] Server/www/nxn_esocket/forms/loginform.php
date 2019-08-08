@@ -118,28 +118,16 @@
 </style>
 <script type="text/javascript">
 function show_login() {
-		//document.getElementById('mdl_sign_in').style.display = "block";
-		// $('#mdl_sign_in').css('display','block');
-		 $('#mdl_sign_in').fadeIn(400);
+	 $('#mdl_sign_in').fadeIn(400);
 }
 function close_login() {
-		//document.getElementById('mdl_sign_in').style.display = "none";
-		$('#mdl_sign_in').fadeOut(400);
+	$('#mdl_sign_in').fadeOut(400);
 }
 function show_override() {
-		//document.getElementById('override').style.display = "block";
-		$('#override').slideDown(400);
+	$('#override').slideDown(400);
 }
 </script>
 <div id="login">
-	<div style="position:relative; width:auto; height:auto;">
-		<!--
-			View Button
-		-->
-		<div id="loginbutton" class="inline_linebreak " onclick="view_change();"><div id="loginbutton_text" style="text-align:center;"><i id="view_change_icon" class="fas fa-th-large" style="font-size:14px; color:#AAA; margin-top:2px;"></i></div></div>
-	</div>
-
-
 	<!--
 		Refresh Button
 	-->
@@ -176,5 +164,4 @@ function show_override() {
 		</table>
 	</form>
 	</div>
-
 </div>

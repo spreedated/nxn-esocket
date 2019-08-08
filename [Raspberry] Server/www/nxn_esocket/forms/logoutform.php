@@ -133,14 +133,12 @@ $(document).ready(function(){
 	<div class="loggedin_text"><?PHP if(isset($_SESSION['loggedinusername'])) { echo 'User <span style="text-decoration: underline;">' . $_SESSION['loggedinusername'] . '</span><br /><p style="opacity:0.5;">Last login<br/> ' . $loggedin_last_login . '</p>'; }else{ die('ERROR 409 - Something went wrong!'); } ?></div>
 	<?PHP
 		//ONE main SQL Query
-		$mainsql_logoutform = 'SELECT show_raspinfo,allow_usersadmin,allow_timedevents,allow_terminal FROM users WHERE username=\'' . $_SESSION['loggedinusername'] . '\' LIMIT 1';
+		$mainsql_logoutform = 'SELECT show_raspinfo,allow_terminal FROM users WHERE username=\'' . $_SESSION['loggedinusername'] . '\' LIMIT 1';
 		$result_mainsql_logoutform = mysqli_query($conn, $mainsql_logoutform);
 
 		if (mysqli_num_rows($result) > 0) {
 			while($row = mysqli_fetch_assoc($result_mainsql_logoutform)) {
 				$allowed_show_raspinfo = ($row['show_raspinfo'] ? true : false);
-				$allowed_usersadmin = ($row['allow_usersadmin'] ? true : false);
-				$allowed_timedevents = ($row['allow_timedevents'] ? true : false);
 				$allowed_terminal = ($row['allow_terminal'] ? true : false);
 			}
 		}else{
@@ -183,37 +181,15 @@ $(document).ready(function(){
 		-->
 		<div id="smalliconbutton" onclick="show_mdl_own_user();"><div id="logoutbutton_text" style="text-align:center;"><i class="far fa-user" style="font-size:18px; color:#00BB00;"></i></div></div>
 		<!--
-			Users Admin Button
-		-->
-		<?PHP
-			 if($_SESSION['isloggedin'] == True AND $allowed_usersadmin == true) {
-				//Timed Events Settings Button
-				echo '<div id="smalliconbutton" onclick="show_mdl_users_admin();"><div id="logoutbutton_text" style="text-align:center;"><i class="far fa-users" style="font-size:18px; color:#999900;"></i></div></div>';
-			}
-		?>
-		<!--
-			Timed Events Settings Button
-		-->
-		<?PHP
-		if($_SESSION['isloggedin'] == True AND $allowed_timedevents == true) {
-			//Timed Events Settings Button
-			echo '<div id="smalliconbutton" onclick="show_mdl_timed_events();"><div id="logoutbutton_text" style="text-align:center;"><i class="far fa-alarm-clock" style="font-size:18px; color:#0077BB;"></i></div></div>';
-		}
-		?>
-		<!--
 			Terminal Button
 		-->
 		<?PHP
 		if($_SESSION['isloggedin'] == True AND $allowed_terminal == true) {
-			//Timed Events Settings Button
+			//Terminal Events Settings Button
 			echo '<div id="smalliconbutton" onclick="show_mdl_terminal();"><div id="logoutbutton_text" style="text-align:center;"><i class="far fa-terminal" style="font-size:18px;"></i></div></div>';
 		}
 		?>
 	</div>
-	<!--
-		View Button
-	-->
-	<div id="smalliconbutton" class="inline_linebreak " onclick="view_change();"><div id="logoutbutton_text" style="text-align:center;"><i id="view_change_icon" class="fas fa-th-large" style="font-size:14px; color:#AAA; margin-top:2px;"></i></div></div>
 	<!--
 		Refresh Button
 	-->

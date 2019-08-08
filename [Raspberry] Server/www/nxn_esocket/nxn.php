@@ -1,4 +1,9 @@
 <?PHP
+define('_company_','neXn-Systems');
+define('_homepage_','nexn.systems');
+define('_developer_','Markus Karl Wackermann');
+define('_version_','2.10.0');
+
 $starttime = microtime(true);
 
 include_once('config.inc.php');
@@ -6,7 +11,6 @@ include_once('config.inc.php');
 // Give $websiteurl var to JAVASCRIPT
 echo '<script type="text/javascript">var websiteurl = "'. _websiteurl_ .'";</script>';
 
-include('functions/func_switch.php');
 include('functions/login.php');
 ?>
 
@@ -16,6 +20,10 @@ include('functions/login.php');
 <link rel="icon" href="nxn_icon.ico" type="image/vnd.microsoft.icon">
 <title>neXn-Systems eSocket</title>
 <style type="text/css">
+@font-face {
+	font-family: lcars;
+	src: url('font/lcarsgtj3.ttf');
+}
 body {
 	background-color: #000;
 	color: #AAA;
@@ -27,14 +35,24 @@ body {
 	display: block;
 	z-index: 1000;
 }
-#socketname {
+.button {
 	margin:auto;
-	margin-bottom: 16px;
 	display: block;
 	width: 450px;
 	height: 66px;
 	overflow: hidden;
 	cursor: pointer;
+	border-radius: 5px 5px 5px 5px;
+	border: solid thin #606060;
+	background-color: #303030;
+}
+.button:hover {
+	background-color: #505050;
+}
+.button_row {
+	margin:auto;
+	margin-bottom: 16px;
+	text-align: center;
 	padding: 6px;
 }
 #iconbutton {
@@ -45,7 +63,8 @@ body {
 	background-position: center;
 	background-size: 90% 90%;
 	position: relative;
-	float: left;
+	left: -2px;
+	display: inline-block;
 	z-index: 1;
 }
 .webp #iconbutton {
@@ -57,21 +76,16 @@ body {
 #textbutton {
 	margin:auto;
 	height:64px;
-	width:450px;
-	border-radius: 5px 5px 5px 5px;
-	border: solid thin #606060;
-	background-color: #303030;
+	width:380px;
+	display: inline-block;
 	color: #fff;
 	font-size: 20px;
 	font-weight:bold;
 	position: relative;
 	z-index: 0;
 }
-#textbutton:hover {
-	background-color: #505050;
-}
 #textbutton_text {
-	margin-left: 72px;
+	margin-left: 8px;
 	width: 100%;
 	height: 100%;
 	top: 50%;
@@ -94,10 +108,11 @@ body {
 	color:#333;
 	text-align:right;
 	z-index: 1;
-	height:62px;
+	height:64px;
 	width:auto;
 	display:inline-block;
-	line-height: 60px;
+	line-height: 64px;
+	font-family: lcars;
 }
 #socketnamediv {
 	position:absolute;
@@ -119,33 +134,25 @@ body {
 .no-webp #logo {
 	background-image: url('img/logo.png');
 }
-#loading {
+.loading {
 	width: 100%;
 	height: 100%;
+	background-size: contain;
 	background-color: #000;
 	background-repeat: no-repeat;
 	background-position: center;
-	display:none;
+	display: none;
 	z-index:9000;
-	position:fixed;
-	top: 0px;
-	left: 0px;
-}
-.webp #loading {
-	background-image: url('img/gears.webp');
-}
-.no-webp #loading {
-	background-image: url('img/gears.gif');
+	background-image: url('img/ripple.svg');
 }
 #collapse_button {
 	position: relative;
 	cursor: pointer;
-	width: auto;
-	max-width: 140px;
+	width: 250px;
+	height: auto;
 	text-align: left;
 	font-size: 9px;
-	padding: 5px;
-	display: block;
+	display: inline-block;
 }
 
 #footer_wrap {
@@ -156,6 +163,11 @@ body {
 	text-align: left;
 	font-size: 9px;
 	margin: auto;
+}
+#nodeInfoDIV {
+	position: relative;
+	display: inline-block;
+	left: 8px;
 }
 #footer_info {
 	position: relative;
@@ -173,6 +185,7 @@ body {
 	width:auto;
 	color: #333333;
 	font-size: 9px;
+	display: block;
 }
 
 .close {
@@ -233,7 +246,9 @@ body {
 }
 </style>
 <link href="css/all.min.css" rel="stylesheet">
+<link href="css/jquery-ui.1.12.1.min.css" rel="stylesheet" />
 <script src="js/jquery-3.4.1.min.js"></script>
+<script src="js/jquery-ui.1.12.1.min.js"></script>
 <script src="js/modernizr.webp.min.js"></script>
 
 <!--
@@ -242,7 +257,6 @@ body {
 <script type="text/javascript">
 var timedsa = <?PHP echo  _pagerefreshinterval_; ?>;
 var reloadPage = true;
-
 $(document).ready(function() {
 	setInterval(function(){
 		timedsa -= 1;
@@ -281,41 +295,47 @@ $(window).on('resize', function(e) {
 <!--
 	### ### ###
 -->
-
 <script type="text/javascript">
-window.onclick = function(event) {
-		if (event.target == document.getElementById('myModal')) {
-				document.getElementById('myModal').style.display = "none";
-		}
-	if (event.target == document.getElementById('myModal_notloggedin')) {
-				document.getElementById('myModal_notloggedin').style.display = "none";
-		}
-}
-</script>
+//Using jQuery
+function nxn_socket(housecode, socketcode, state, buttonid, socketName) {
+	//If offline, set on and vice versa
+	state = (parseInt(state) == 0) ? 1 : 0;
 
-<script type="text/javascript">
-function nxn_socket(dip_main,dip_second,state) {
-	document.getElementById("loading").style.display = "block";
+	$(document.body).css({'cursor' : 'progress'});
+	$("#"+buttonid).prepend('<div class="loading"></div>');
+	$("#"+buttonid+ " .loading").fadeIn(400, function(){
+		$.get("functions/func_switch.php?socketswitch="+housecode+"-"+socketcode+"-"+state, function(data, status) {
+			if(state == 0) {
+				$("#"+buttonid + " #iconbutton").addClass("red");
+				$("#"+buttonid + " #iconbutton").removeClass("green");
+			}else{
+				$("#"+buttonid + " #iconbutton").addClass("green");
+				$("#"+buttonid + " #iconbutton").removeClass("red");
+			}
+			//Refresh ONCLICK function
+			if ($("#"+buttonid).attr("onclick").indexOf('show_confirmbox') >= 0 ) {
+				$("#"+buttonid).attr("onclick","show_confirmbox('"+socketName+"', function() {nxn_socket('"+housecode+"','"+socketcode+"','"+state+"','"+buttonid+"','"+socketName+"');});");
+			}else {
+				$("#"+buttonid).attr("onclick","nxn_socket('"+housecode+"', '"+socketcode+"', '"+state+"', '"+buttonid+"','"+socketName+"');");
+			}
 
-	if(parseInt(state) == 0){
-		state = 1;
-	}else{
-		state = 0;
-	}
-
-	window.location = websiteurl + "/nxn.php?socketswitch="+dip_main+"-"+dip_second+"-"+state;
+			$("#"+buttonid+ " .loading").fadeOut(400, function(){
+				$(document.body).css({'cursor' : 'default'});
+				$("#"+buttonid).remove('.loading');
+			});
+		});
+	});
 }
 </script>
 
 <script type="text/javascript">
 function toggle_footer() {
-	if(document.getElementById("footer_nodes").style.display == "none") {
-		document.getElementById("footer_nodes").style.display = "block";
-		document.getElementById("collapse_button").innerHTML = "[-] " + document.getElementById("collapse_button").innerHTML.substr(4)
+	if($("#footer_nodes").css('display') == "none") {
+		$('#collapse_button').html("[-] " + $('#collapse_button').html().substr(4));
 	}else{
-		document.getElementById("footer_nodes").style.display = "none";
-		document.getElementById("collapse_button").innerHTML = "[+] " + document.getElementById("collapse_button").innerHTML.substr(4)
+		$('#collapse_button').html("[+] " + $('#collapse_button').html().substr(4));
 	}
+	$('#footer_nodes').toggle('fold');
 }
 </script>
 
@@ -326,16 +346,11 @@ function toggle_footer() {
 //INCLUDE FUNCTIONS
 include('functions/mysql_conn.php'); //Must be first
 include('functions/cls_modalboxes.php');
-include('functions/cls_socketbuttons.php');
 
 //INLCLUDE FORMS
-include('forms/notloggedin.php');
-include('forms/categories.php');
 if(isset($_SESSION['isloggedin']) == True AND $_SESSION['isloggedin'] = True) {
-	include('forms/btn_timed_events.php');
 	include('forms/btn_own_user.php');
 	include('forms/btn_terminal.php');
-	include('forms/btn_users_admin.php');
 	include('forms/logoutform.php'); //Must be last
 }else{
 	include('forms/loginform.php');
@@ -344,12 +359,11 @@ if(isset($_SESSION['isloggedin']) == True AND $_SESSION['isloggedin'] = True) {
 
 <div id="main">
 		<div id="logo"></div>
-		<?PHP echo categories($conn); ?>
 		<div id="socketbutton_wrapper">
 <?PHP
 
 // MySQL GETS
-$sql = "SELECT * FROM sockets";
+$sql = "SELECT id, housecode, socketcode, controlled_device, hardware_active, state, needs_permit, needs_confirmation, icon FROM sockets";
 $result = mysqli_query($conn, $sql);
 
 // ### ### ### ###
@@ -421,41 +435,35 @@ if (mysqli_num_rows($result) > 0) {
 			$confirm_icon = '<i class="fas fa-window-restore" style="color:#777; position:absolute; right: 20px;top:'.$confirm_icon_heigt.';"></i>';
 		}
 
+		//Socketname with ID
+		$id = "socketname" . $row['id'];
+
 		//Socketbutton Template
 		$socketbutton = array();
-		array_push($socketbutton, "<div id=\"socketname\" class=\"socketname_button\" onClick=\"");
-		array_push($socketbutton, "\"><div id=\"iconbutton\" ". $icon . $btn_state . " ></div><div id=\"textbutton\" class=\"socketname_textbutton\"><div id=\"textbutton_text\"><div id=\"socketnamediv\" class=\"socketname_textbutton_controlled_device\">" . $row['controlled_device'] . "</div><div id=\"socketnumber\" class=\"socketname_textbutton\">" . $row['id'] . "</div>" . $needs_permit . $confirm_icon . "</div></div></div>");
+		array_push($socketbutton, "<div id=\"button_row\" class=\"button_row\"><div id=\"socketname" . $row['id'] . "\" class=\"button\" onClick=\"");
+		array_push($socketbutton, "\"><div id=\"iconbutton\" ". $icon . $btn_state . " ></div><div id=\"textbutton\" class=\"socketname_textbutton\"><div id=\"textbutton_text\"><div id=\"socketnamediv\" class=\"socketname_textbutton_controlled_device\">" . $row['controlled_device'] . "</div><div id=\"socketnumber\" class=\"socketname_textbutton\">" . $row['id'] . "</div>" . $needs_permit . $confirm_icon . "</div></div></div></div>");
 
-		//Make Buttons
-		if($row['needs_confirmation'] == False) {
-			echo no_confirm($ok_to_operate, $row['dip_main'], $row['dip_second'], $row['state'], $socketbutton);
-		}else{
-			echo do_confirm($ok_to_operate, $row['dip_main'], $row['dip_second'], $row['state'], $row['controlled_device'], $row['id'], $socketbutton);
+		//Create Buttons
+		$output = "";
+		switch($ok_to_operate) {
+			case True:
+				if ($row['needs_confirmation']) {
+					$output .= $socketbutton[0] . "show_confirmbox('".$row['controlled_device']."', function() {nxn_socket('".$row['housecode']."','".$row['socketcode']."','".$row['state']."','socketname". $row['id'] . "','" . $row['controlled_device'] ."');});" . $socketbutton[1];
+				}else{
+					$output .= $socketbutton[0] . "nxn_socket('".$row['housecode']."','".$row['socketcode']."','".$row['state']."','socketname". $row['id'] . "','" . $row['controlled_device'] ."');" . $socketbutton[1];
+				}
+				break;
+			case False:
+				$output .= $socketbutton[0] . "show_noPermission();" . $socketbutton[1];
+				break;
 		}
-
+		echo $output;
+		//# ### #
 	}
 } else {
 		echo "0 results";
 }
 ?>
-
-<!--
-	### DEBUG BUTTON
--->
-
-<!-- <div id="socketname" onclick="" style="width: 230px;">
-	<div id="iconbutton" style="background-color:#777; height:65px"></div>
-	<div id="textbutton" style="width: 230px; ">
-		<div id="textbutton_text">
-			<div id="socketnamediv">Timed Events</div>
-		</div>
-	</div>
-</div> -->
-
-
-<!--
-	### ### ### ### ###
--->
 	</div> <!-- Socketbutton Wrapper -->
 
 </div>
@@ -464,31 +472,81 @@ if (mysqli_num_rows($result) > 0) {
 	### FOOTER NODES
 -->
 <div id="footer_wrap">
+<div id="nodeInfoDIV">
 <div style="color: #44A601;font-size: 24px; display:inline-block;float: left; margin-right: 4px;"><i class="fas fa-broadcast-tower"></i></div>
 <?PHP
-$sql = "SELECT COUNT(*) AS total FROM sockets";
+$sql = "SELECT COUNT(id) AS total FROM sockets";
 $result = mysqli_query($conn, $sql);
 if (mysqli_num_rows($result) > 0) {
 		// output data of each row
 		while($row = mysqli_fetch_assoc($result)) {
-				echo "<div id=\"footer_info\">Number of connected sockets <span style=\"color:#44A601\">". $row['total'] . "</span></div>";
+				echo "<div id=\"footer_info\">Number of connected sockets <span style=\"color:#44A601\">". $row['total'] . "</span></div><br />";
 		}
 }
 ?>
+
+<?PHP
+$sql = "SELECT COUNT(id) AS total, SUM(CASE WHEN is_active = 0 AND is_inUSE = 1 THEN 1 ELSE 0 END) AS inactiveNodes, SUM(CASE WHEN is_inUSE = 0 THEN 1 ELSE 0 END) AS unusedNodes FROM nodes";
+$result = mysqli_query($conn, $sql);
+if (mysqli_num_rows($result) > 0) {
+		$row = mysqli_fetch_assoc($result);
+
+		$endtext = "";
+		if($row['total'] == 1) {
+			$endtext .= "Node active";
+		}else{
+			$endtext .= "Nodes active";
+		}
+
+		if ($row['unusedNodes'] > 0) {
+			$endtext .= ' - ' . $row['unusedNodes'] . ' unused Nodes';
+		}
+
+		if ($row['inactiveNodes'] > 0) {
+			$endtext .= "<span style=\"color:#FF0000; text-weight: bold; margin-left: 3px;\"><i id=\"warning\" class=\"fal fa-exclamation-triangle\"></i></span> ";
+			$endtext .= "<script>(function pulse(){\$('#warning').delay(200).fadeOut('slow').delay(50).fadeIn('slow',pulse);})();</script>";
+		}
+
+		echo "<div id=\"collapse_button\" onClick=\"toggle_footer();\">[+] <span style=\"color:#44A601\">". $row['total'] . "</span> " . $endtext . "</div>";
+}
+?>
+
+<div id="footer_nodes" style="display:none;">
+<?PHP
+$sql = "SELECT id, ip, port, location, is_active, is_inUSE, name FROM nodes";
+$result = mysqli_query($conn, $sql);
+if (mysqli_num_rows($result) > 0) {
+		// output data of each row
+		while($row = mysqli_fetch_assoc($result)) {
+			$Sign = "";
+			if (!$row['is_active'] && $row['is_inUSE']) {
+				$Sign = "<span style=\"color:#FF0000; text-weight: bold;\"><i class=\"fal fa-exclamation-triangle\"></i></span> ";
+			}
+			if (!$row['is_inUSE']) {
+				$Sign = "<span style=\"color:#DDDDDD; text-weight: bold;\"><i class=\"fas fa-expand-wide\"></i></span> ";
+			}
+			if ($row['is_active'] && $row['is_inUSE']) {
+				$Sign = "<span style=\"color:#FFFFFF; text-weight: bold;\"><i class=\"far fa-check-circle\"></i></span> ";
+			}
+			echo $Sign . 'Id: ' . $row['id'] . ' -- IP: ' . $row['ip'] . ' -- Port: ' . $row['port'] . ' -- Location: ' . $row['location'] . ' -- Name: ' . $row['name'] . '<br/>';
+		}
+} else {
+		echo "0 results";
+}
+?>
+</div>
+</div>
+<!--
+	### ### ### ### ###
+-->
 <!--
 	### VERSION DIV
 -->
 <div id="version">
 <p style="margin:0px;padding:0px;">
 <?PHP
-$sql = "SELECT * FROM system";
-$result = mysqli_query($conn, $sql);
-if (mysqli_num_rows($result) > 0) {
-		// output data of each row
-		while($row = mysqli_fetch_assoc($result)) {
-				echo 'Version ' . $row['versionstring'] . '<br />';
-		}
-}
+echo 'Version ' . _version_ . '<br />';
+echo '<script>document.title = document.title + \' v\' + \''._version_.'\'</script>';
 ?>
 	2019 &copy; ne<span style="color:#44A601">X</span>n-Systems<br />
 	<?PHP $endtime = microtime(true); ?>
@@ -498,59 +556,8 @@ if (mysqli_num_rows($result) > 0) {
 <!--
 	### ### ###
 -->
+</div><!-- ### END FOOTER ### -->
 
-<?PHP
-$sql = "SELECT COUNT(*) AS total FROM nodes";
-$result = mysqli_query($conn, $sql);
-if (mysqli_num_rows($result) > 0) {
-		// output data of each row
-		$endtext = "";
-		while($row = mysqli_fetch_assoc($result)) {
-			if($row['total'] == 1) {
-				$endtext = "</span> Node active</div>";
-			}else{
-				$endtext = "</span> Nodes active</div>";
-			}
-			echo "<div id=\"collapse_button\" onClick=\"toggle_footer();\">[+] <span style=\"color:#44A601\">". $row['total'] . $endtext;
-		}
-}
-?>
-
-
-<div id="footer_nodes" style="display:none;">
-<?PHP
-$sql = "SELECT id,ip,port,location,is_active,name FROM nodes";
-$result = mysqli_query($conn, $sql);
-if (mysqli_num_rows($result) > 0) {
-		// output data of each row
-		while($row = mysqli_fetch_assoc($result)) {
-			$offlinetext = "";
-			if (!$row['is_active']) {
-				$offlinetext = "<span style=\"color:#FF0000; text-weight: bold;\"> [OFFLINE]</span>";
-			}
-			echo 'Id: ' . $row['id'] . ' -- IP: ' . $row['ip'] . ' -- Port: ' . $row['port'] . ' -- Location: ' . $row['location'] . ' -- Name: ' . $row['name'] . $offlinetext . '<br/>';
-		}
-} else {
-		echo "0 results";
-}
-?>
-</div>
-<!--
-	### ### ### ### ###
--->
-
-
-</div>
-
-<div id="loading"></div>
-<!--
-	JavaScript for View Handling
--->
-<script src="js/cookie_handling.js"></script>
-<script src="js/view_change.js"></script>
-<!--
-	### ### ###
--->
 </body>
 </html>
 <?PHP

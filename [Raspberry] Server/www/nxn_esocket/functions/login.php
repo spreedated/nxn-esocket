@@ -91,7 +91,7 @@ if(isset($_COOKIE[_cookiename_])) {
 
 if(isset($_POST["username"]) AND isset($_POST["current-password"])) {
 	//Check MySQL
-	$sql = "SELECT id,username,password,last_login,login_timeout,salt,show_raspinfo,allow_usersadmin,allow_timedevents,allow_terminal FROM users WHERE username=\"" . $_POST["username"] . "\" LIMIT 1";
+	$sql = "SELECT id,username,password,last_login,login_timeout,salt,show_raspinfo,allow_terminal FROM users WHERE username=\"" . $_POST["username"] . "\" LIMIT 1";
 	$result = mysqli_query($conn, $sql);
 
 	if (mysqli_num_rows($result) > 0) {
