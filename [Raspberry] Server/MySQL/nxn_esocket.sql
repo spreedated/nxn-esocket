@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 192.168.1.105
--- Erstellungszeit: 08. Aug 2019 um 06:39
+-- Erstellungszeit: 08. Aug 2019 um 08:10
 -- Server-Version: 10.1.38-MariaDB-0+deb9u1
 -- PHP-Version: 7.0.33-0+deb9u3
 
@@ -114,21 +114,22 @@ CREATE TABLE `sockets` (
   `state` tinyint(1) NOT NULL DEFAULT '0',
   `needs_permit` tinyint(1) NOT NULL DEFAULT '0',
   `needs_confirmation` tinyint(1) NOT NULL DEFAULT '0',
-  `icon` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
+  `icon` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `displayOrder` int(11) NOT NULL DEFAULT '99'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Daten für Tabelle `sockets`
 --
 
-INSERT INTO `sockets` (`id`, `housecode`, `socketcode`, `controlled_device`, `hardware_active`, `state`, `needs_permit`, `needs_confirmation`, `icon`) VALUES
-(1, '10011', '1', 'Mosquito EX-5000', 1, 1, 0, 1, 'ex5000'),
-(2, '10011', '2', 'Nintendo Wii', 1, 0, 0, 0, 'wii0'),
-(3, '10011', '3', 'Brunnen', 1, 0, 0, 0, 'brunnen'),
-(4, '10011', '4', 'Schranklicht', 1, 1, 0, 0, 'cupboard'),
-(5, '10011', '5', 'AMPLIFi 75', 1, 0, 0, 1, 'amp'),
-(6, '10111', '1', 'Festplatte Extern', 1, 0, 0, 1, 'extern_hdd'),
-(7, '10111', '2', 'Schlafzimmer', 1, 0, 0, 0, 'ceiling_light1');
+INSERT INTO `sockets` (`id`, `housecode`, `socketcode`, `controlled_device`, `hardware_active`, `state`, `needs_permit`, `needs_confirmation`, `icon`, `displayOrder`) VALUES
+(1, '10011', '1', 'Mosquito EX-5000', 1, 0, 0, 1, 'ex5000', 1),
+(2, '10011', '2', 'Nintendo Wii', 1, 0, 0, 0, 'wii0', 3),
+(3, '10011', '3', 'Brunnen', 1, 0, 0, 0, 'brunnen', 99),
+(4, '10011', '4', 'Schranklicht', 1, 0, 0, 0, 'cupboard', 99),
+(5, '10011', '5', 'AMPLIFi 75', 1, 0, 0, 1, 'amp', 99),
+(6, '10111', '1', 'Festplatte Extern', 1, 0, 0, 1, 'extern_hdd', 99),
+(7, '10111', '2', 'Schlafzimmer', 1, 0, 0, 0, 'ceiling_light1', 2);
 
 -- --------------------------------------------------------
 
@@ -152,7 +153,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `salt`, `last_login`, `show_raspinfo`, `login_timeout`, `allow_terminal`) VALUES
-(1, 'SpReeD', 'a9d136dbc7d3a367$UNs2YbHr/rdAsX/VsO2./mFVQoQ/H12U8wY9/SPLS2l8WwITimKdx7DKeybZ3phNqGfMckvEUm4Js65oPTwN./', 'a9d136dbc7d3a367', 1565238444, 1, 120, 1);
+(1, 'SpReeD', 'a9d136dbc7d3a367$UNs2YbHr/rdAsX/VsO2./mFVQoQ/H12U8wY9/SPLS2l8WwITimKdx7DKeybZ3phNqGfMckvEUm4Js65oPTwN./', 'a9d136dbc7d3a367', 1565240197, 1, 120, 1);
 
 --
 -- Indizes der exportierten Tabellen

@@ -2,7 +2,7 @@
 define('_company_','neXn-Systems');
 define('_homepage_','nexn.systems');
 define('_developer_','Markus Karl Wackermann');
-define('_version_','2.10.1');
+define('_version_','2.10.2');
 
 $starttime = microtime(true);
 
@@ -364,7 +364,7 @@ if(isset($_SESSION['isloggedin']) == True AND $_SESSION['isloggedin'] = True) {
 <?PHP
 
 // MySQL GETS
-$sql = "SELECT id, housecode, socketcode, controlled_device, hardware_active, state, needs_permit, needs_confirmation, icon FROM sockets";
+$sql = "SELECT id, housecode, socketcode, controlled_device, hardware_active, state, needs_permit, needs_confirmation, icon, displayOrder FROM sockets ORDER BY displayOrder, id ASC";
 $result = mysqli_query($conn, $sql);
 
 // ### ### ### ###
