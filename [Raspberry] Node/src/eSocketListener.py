@@ -9,7 +9,7 @@ import sys
 import esocket
 import ConfigParser
 
-version = '1.8'
+version = '1.9'
 
 UDP_IP_ADDRESS = ''
 UDP_PORT_NO = 0
@@ -23,7 +23,8 @@ def read_config():
 	try:
 		log.write_log('Reading config...', 'read_config', 'INIT')
 		Config = ConfigParser.ConfigParser()
-		Config.read("config.conf")
+		dir_path = os.path.dirname(os.path.realpath(__file__))
+		Config.read(dir_path + '/config.conf')
 		UDP_PORT_NO = Config.getint('Listener','port')
 		INTERFACE = Config.get('Listener','interface')
 		log.write_log('Config loaded!', 'read_config', 'INIT')
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 			continue
 		try:
 			socket = data.split("#")
-			p = Popen(['/src/raspberry-remote/send',socket[0],socket[1],socket[2]], stdout=PIPE, stderr=PIPE)
+			p = Popen(['/src/raspberry-remote/send','-b',socket[0],str(int(socket[1],2)),socket[2]], stdout=PIPE, stderr=PIPE)
 			stdout, stderr = p.communicate()
 			stdout = stdout.replace('\n',' --- ')
 			stderr = stderr.replace('\n',' --- ')

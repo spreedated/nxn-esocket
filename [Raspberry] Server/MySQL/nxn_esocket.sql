@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 192.168.1.105
--- Erstellungszeit: 08. Aug 2019 um 08:10
+-- Erstellungszeit: 08. Aug 2019 um 12:07
 -- Server-Version: 10.1.38-MariaDB-0+deb9u1
 -- PHP-Version: 7.0.33-0+deb9u3
 
@@ -102,6 +102,54 @@ INSERT INTO `nodes` (`id`, `name`, `location`, `ip`, `port`, `is_inUse`, `is_act
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `socketcodes`
+--
+
+CREATE TABLE `socketcodes` (
+  `id` int(11) NOT NULL,
+  `socketcode` varchar(5) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Daten für Tabelle `socketcodes`
+--
+
+INSERT INTO `socketcodes` (`id`, `socketcode`) VALUES
+(1, '00000'),
+(2, '00001'),
+(3, '00011'),
+(4, '00100'),
+(5, '00101'),
+(6, '00110'),
+(7, '00111'),
+(8, '01000'),
+(9, '01001'),
+(10, '01010'),
+(11, '01011'),
+(12, '01100'),
+(13, '01101'),
+(14, '01110'),
+(15, '01111'),
+(16, '10000'),
+(17, '10001'),
+(18, '10010'),
+(19, '10011'),
+(20, '10100'),
+(21, '10101'),
+(22, '10110'),
+(23, '10111'),
+(24, '11000'),
+(25, '11001'),
+(26, '11010'),
+(27, '11011'),
+(28, '11100'),
+(29, '11101'),
+(30, '11110'),
+(31, '11111');
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `sockets`
 --
 
@@ -123,13 +171,20 @@ CREATE TABLE `sockets` (
 --
 
 INSERT INTO `sockets` (`id`, `housecode`, `socketcode`, `controlled_device`, `hardware_active`, `state`, `needs_permit`, `needs_confirmation`, `icon`, `displayOrder`) VALUES
-(1, '10011', '1', 'Mosquito EX-5000', 1, 0, 0, 1, 'ex5000', 1),
-(2, '10011', '2', 'Nintendo Wii', 1, 0, 0, 0, 'wii0', 3),
-(3, '10011', '3', 'Brunnen', 1, 0, 0, 0, 'brunnen', 99),
-(4, '10011', '4', 'Schranklicht', 1, 0, 0, 0, 'cupboard', 99),
-(5, '10011', '5', 'AMPLIFi 75', 1, 0, 0, 1, 'amp', 99),
-(6, '10111', '1', 'Festplatte Extern', 1, 0, 0, 1, 'extern_hdd', 99),
-(7, '10111', '2', 'Schlafzimmer', 1, 0, 0, 0, 'ceiling_light1', 2);
+(1, '10011', '00000', 'Mosquito EX-5000', 1, 0, 0, 1, 'ex5000', 1),
+(2, '10011', '00001', 'Nintendo Wii', 1, 0, 0, 0, 'wii0', 4),
+(3, '10011', '00011', 'Brunnen', 1, 0, 0, 0, 'brunnen', 99),
+(4, '10011', '00100', 'Schranklicht', 1, 0, 0, 0, 'cupboard', 99),
+(5, '10011', '00101', 'Laptop', 1, 0, 0, 0, NULL, 3),
+(6, '10011', '00110', 'Festplatte Extern', 1, 0, 0, 1, 'extern_hdd', 99),
+(7, '10011', '00111', 'Schlafzimmer', 1, 0, 0, 0, 'ceiling_light1', 2),
+(8, '10011', '01000', 'Empty', 0, 0, 0, 0, NULL, 99),
+(9, '10011', '01001', 'Empty', 0, 0, 0, 0, NULL, 99),
+(10, '10011', '01010', 'Empty', 0, 0, 0, 0, NULL, 99),
+(11, '10011', '01011', 'Empty', 0, 0, 0, 0, NULL, 99),
+(12, '10011', '01100', 'Empty', 0, 0, 0, 0, NULL, 99),
+(13, '10011', '01101', 'Empty', 0, 0, 0, 0, NULL, 99),
+(14, '10011', '01110', 'Empty', 0, 0, 0, 0, NULL, 99);
 
 -- --------------------------------------------------------
 
@@ -180,13 +235,21 @@ ALTER TABLE `nodes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indizes für die Tabelle `socketcodes`
+--
+ALTER TABLE `socketcodes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `socketcode` (`socketcode`);
+
+--
 -- Indizes für die Tabelle `sockets`
 --
 ALTER TABLE `sockets`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `constraint_dip_main` (`housecode`),
   ADD KEY `constraint_icon` (`icon`),
-  ADD KEY `controlled_device` (`controlled_device`);
+  ADD KEY `controlled_device` (`controlled_device`),
+  ADD KEY `constraint_socketcode` (`socketcode`),
+  ADD KEY `constraint_housecode` (`housecode`);
 
 --
 -- Indizes für die Tabelle `users`
@@ -218,10 +281,16 @@ ALTER TABLE `nodes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT für Tabelle `socketcodes`
+--
+ALTER TABLE `socketcodes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+
+--
 -- AUTO_INCREMENT für Tabelle `sockets`
 --
 ALTER TABLE `sockets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT für Tabelle `users`
@@ -237,8 +306,9 @@ ALTER TABLE `users`
 -- Constraints der Tabelle `sockets`
 --
 ALTER TABLE `sockets`
-  ADD CONSTRAINT `constraint_dip_main` FOREIGN KEY (`housecode`) REFERENCES `dip_list` (`housecode`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `constraint_icon` FOREIGN KEY (`icon`) REFERENCES `icons` (`icon`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `constraint_housecode` FOREIGN KEY (`housecode`) REFERENCES `dip_list` (`housecode`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `constraint_icon` FOREIGN KEY (`icon`) REFERENCES `icons` (`icon`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `constraint_socketcode` FOREIGN KEY (`socketcode`) REFERENCES `socketcodes` (`socketcode`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

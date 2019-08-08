@@ -2,7 +2,7 @@
 define('_company_','neXn-Systems');
 define('_homepage_','nexn.systems');
 define('_developer_','Markus Karl Wackermann');
-define('_version_','2.10.2');
+define('_version_','2.10.3');
 
 $starttime = microtime(true);
 
@@ -476,12 +476,12 @@ if (mysqli_num_rows($result) > 0) {
 <div id="nodeInfoDIV">
 <div style="color: #44A601;font-size: 24px; display:inline-block;float: left; margin-right: 4px;"><i class="fas fa-broadcast-tower"></i></div>
 <?PHP
-$sql = "SELECT COUNT(id) AS total FROM sockets";
+$sql = "SELECT COUNT(id) AS total, SUM(CASE WHEN hardware_active = 1 THEN 1 ELSE 0 END) as active FROM sockets";
 $result = mysqli_query($conn, $sql);
 if (mysqli_num_rows($result) > 0) {
 		// output data of each row
 		while($row = mysqli_fetch_assoc($result)) {
-				echo "<div id=\"footer_info\">Number of connected sockets <span style=\"color:#44A601\">". $row['total'] . "</span></div><br />";
+				echo "<div id=\"footer_info\">Active/Total sockets <span style=\"color:#44A601\">". $row['active'] . "/". $row['total'] . "</span></div><br />";
 		}
 }
 ?>
