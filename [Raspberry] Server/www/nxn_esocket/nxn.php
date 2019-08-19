@@ -26,14 +26,37 @@ include('functions/login.php');
 }
 body {
 	background-color: #000;
+	background-position: center;
+	background-blend-mode:screen;
 	color: #AAA;
 	font-family: "Arial Black", Gadget, sans-serif;
 	font-size: 32px;
+}
+.webp body {
+	background-image:url('img/bg.webp');
+}
+.no-webp body {
+	background-image:url('img/bg.jpg');
 }
 #main {
 	margin:auto;
 	display: block;
 	z-index: 1000;
+}
+#logo {
+	margin: auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	width:461px;
+	height:141px;
+	margin-bottom: 50px;
+}
+.webp #logo {
+	background-image: url('img/logo.webp');
+}
+.no-webp #logo {
+	background-image: url('img/logo.png');
 }
 .button {
 	margin:auto;
@@ -66,12 +89,7 @@ body {
 	left: -2px;
 	display: inline-block;
 	z-index: 1;
-}
-.webp #iconbutton {
-	background-image:url('img/icons/socket.webp');
-}
-.no-webp #iconbutton {
-	background-image:url('img/icons/socket.png');
+	background-image:url('img/icons/socket.svg');
 }
 #textbutton {
 	margin:auto;
@@ -91,7 +109,6 @@ body {
 	top: 50%;
 	margin-top: 2px;
 }
-
 .green {
 	border: solid thin #00A000;
 	background-color: #44A601;
@@ -120,21 +137,6 @@ body {
 	margin-top:15px;
 	z-index: 2;
 }
-#logo {
-	margin: auto;
-	/* background-image: url('img/logo.webp'); */
-	background-position: center;
-	background-repeat: no-repeat;
-	width:461px;
-	height:141px;
-	margin-bottom: 50px;
-}
-.webp #logo {
-	background-image: url('img/logo.webp');
-}
-.no-webp #logo {
-	background-image: url('img/logo.png');
-}
 .loading {
 	width: 100%;
 	height: 100%;
@@ -155,7 +157,6 @@ body {
 	font-size: 9px;
 	display: inline-block;
 }
-
 #footer_wrap {
 	position: relative;
 	bottom:0;
@@ -223,7 +224,9 @@ body {
 .cancelcross:hover {
 	color:#880000;
 }
-
+.ui-effects-transfer {
+	border: 2px dotted gray;
+}
 @media only screen and (max-width: 480px){
 	#footer_wrap {
 		zoom: 180%;
@@ -389,12 +392,9 @@ if (mysqli_num_rows($result) > 0) {
 		// icon
 		$icon = '';
 		if ($row['icon'] != NULL) {
-			if(file_exists('img/icons/' . $row['icon'] . '.png')) {
-				if( strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' ) !== false ) {
-					$icon = "style=\"background-image:url('img/icons/" . $row['icon'] . ".webp');\" ";
-				}else{
-					$icon = "style=\"background-image:url('img/icons/" . $row['icon'] . ".png');\" ";
-				}
+			$iconpath = 'img/icons/' . $row['icon'] . '.svg';
+			if(file_exists($iconpath)) {
+				$icon = "style=\"background-image:url(".$iconpath.");\" ";
 			}
 		}
 

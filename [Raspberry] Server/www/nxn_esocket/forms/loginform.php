@@ -10,9 +10,9 @@
 	 padding: 0px;
 	 right:8px;
 }
-#loginbutton {
+.iconButton {
 	height:24px;
-	width:48px;
+	width:30px;
 	border-radius: 5px 5px 5px 5px;
 	border: solid thin #606060;
 	background-color: #303030;
@@ -22,11 +22,15 @@
 	position: relative;
 	text-align: center;
 	cursor: pointer;
-	margin:0px;
-	margin-bottom:4px;
-	margin-left:-6px;
-	width:30px;
+	margin:4px;
+	margin-left: -6px;
 	display: inline-block;
+}
+.iconButton:hover {
+	background-color: #505050;
+}
+.iconButton-firstLeft {
+	margin-left: 4px;
 }
 #loginbutton_text {
 	top:12%;
@@ -34,9 +38,6 @@
 	text-align:center;
 	width: 100%;
 	position: absolute;
-}
-#loginbutton:hover {
-	background-color: #505050;
 }
 .inputbox {
 	border-radius: 8px 8px 8px 8px;
@@ -89,36 +90,30 @@
 	border: solid thin #606060;
 	background-color: #000000;
 }
-#longbutton {
-	height:24px;
-	width:68px;
+.longbutton {
+	height:24px !important;
+	line-height:24px !important;
+	width:120px !important;
 	border-radius: 5px 5px 5px 5px;
 	border: solid thin #606060;
-	background-color: #000;
+	background-color: #303030;
 	color: #fff;
-	font-size: 36px;
+	font-size: 16px !important;
 	font-weight:none;
 	position: relative;
 	text-align: center;
 	cursor: pointer;
-	margin:0px;
-	margin-bottom:4px;
-	margin-left:-6px;
+	margin: auto;
 	display: block;
+	cursor: pointer;
 }
-#longbutton div {
-	top:12%;
-	left:0px;
-	text-align:center;
-	position: absolute;
-}
-#longbutton:hover {
-	background-color: #202020;
+.longbutton:hover {
+	background-color: #505050;
 }
 </style>
 <script type="text/javascript">
 function show_login() {
-	 $('#mdl_sign_in').fadeIn(400);
+	$('#mdl_sign_in').fadeIn(400);
 }
 function close_login() {
 	$('#mdl_sign_in').fadeOut(400);
@@ -131,11 +126,11 @@ function show_override() {
 	<!--
 		Refresh Button
 	-->
-	<div id="loginbutton" class="inline_linebreak" onclick="window.location = '<?PHP echo _websiteurl_; ?>';"><div id="loginbutton_text" style="text-align:center;"><i class="far fa-redo-alt" style="font-size:14px; color:#AAA; margin-top:2px;"></i></div></div>
+	<div id="loginbutton" class="iconButton iconButton-firstLeft" onclick="window.location = '<?PHP echo _websiteurl_; ?>';"><div id="loginbutton_text" style="text-align:center;"><i class="far fa-redo-alt" style="font-size:14px; color:#AAA; margin-top:2px;"></i></div></div>
 	<!--
 		Login Button
 	-->
-	<div id="loginbutton" onClick="show_login();" style="width:30px;"><div id="loginbutton_text"><i class="far fa-sign-in-alt" style="font-size:18px; color:#00BB00;"></i></div></div>
+	<div id="loginbutton" class="iconButton" onClick="show_login();" style="width:30px;"><div id="loginbutton_text"><i class="far fa-sign-in-alt" style="font-size:18px; color:#00BB00;"></i></div></div>
 
 </div>
 
@@ -159,7 +154,7 @@ function show_override() {
 				<td colspan="2" style="text-align:center;">&nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="2" style="text-align:center;"><div id="textbutton" style="width:120px; height:24px; font-size:16px; margin: auto; cursor: pointer; line-height:24px;" onclick="document.forms['login_form'].submit();">Login</div></td>
+				<td colspan="2" style="text-align:center;"><div class="longbutton" onclick="document.forms['login_form'].submit();">Login</div></td>
 			</tr>
 		</table>
 	</form>

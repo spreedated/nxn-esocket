@@ -8,8 +8,9 @@ from subprocess import PIPE
 import sys
 import esocket
 import ConfigParser
+import time
 
-version = '1.9'
+version = '1.10'
 
 UDP_IP_ADDRESS = ''
 UDP_PORT_NO = 0
@@ -75,13 +76,15 @@ if __name__ == "__main__":
 			continue
 		try:
 			socket = data.split("#")
-			p = Popen(['/src/raspberry-remote/send','-b',socket[0],str(int(socket[1],2)),socket[2]], stdout=PIPE, stderr=PIPE)
-			stdout, stderr = p.communicate()
-			stdout = stdout.replace('\n',' --- ')
-			stderr = stderr.replace('\n',' --- ')
-			if(len(stdout) <= 0):
-				log.write_log('Housecode['+socket[0]+'] - Device['+socket[1]+'] - State['+socket[2]+']' + '[RAW->] ' + stderr, 'MAIN','ERROR')
-			else:
-				log.write_log('Data sent -> Housecode['+socket[0]+'] - Device['+socket[1]+'] - State['+socket[2]+']' + '[RAW->] ' + stdout, 'MAIN','DATARCVD')
+			for i in range(5):
+				p = Popen(['/src/raspberry-remote/send','-b',socket[0],str(int(socket[1],2)),socket[2]], stdout=PIPE, stderr=PIPE)
+				stdout, stderr = p.communicate()
+				stdout = stdout.replace('\n',' --- ')
+				stderr = stderr.replace('\n',' --- ')
+				if(len(stdout) <= 0):
+					log.write_log('Housecode['+socket[0]+'] - Device['+socket[1]+'] - State['+socket[2]+']' + '[RAW->] ' + stderr, 'MAIN','ERROR')
+				else:
+					log.write_log('Data sent -> Housecode['+socket[0]+'] - Device['+socket[1]+'] - State['+socket[2]+']' + '[RAW->] ' + stdout, 'MAIN','DATARCVD')
+				time.sleep(0.2)
 		except Exception, e:
 			log.write_log('[' + str(e) + '] - Data rcvd: [' + str(data) + '] from [' + str(addr[0]) + ']', 'MAIN', 'ERROR')

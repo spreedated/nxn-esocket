@@ -11,8 +11,8 @@ const char* ssid = "nxn-fritz";
 const char* password = "69469573606998461850";
 
 //Node Ethernet Information
-const String nodeHostname = "nxn-nodeMCU-108";
-const String nodeIP = "192.168.1.108";
+const String nodeHostname = "nxn-nodeMCU-107";
+const String nodeIP = "192.168.1.107";
 const int nodePort = 13337;
 const String inetDNSServer = "192.168.1.105";
 const String inetGateway = "192.168.1.254";
@@ -78,7 +78,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  Serial.println("Welcome to the neXn-Systems NodeMCU v1.0");
+  Serial.println("Welcome to the neXn-Systems NodeMCU v1.1");
 
   //WiFi Connection
   Serial.printf("Connecting to %s ", ssid);
@@ -167,10 +167,16 @@ void loop() {
       }
       
       if(onORoff == "0") {
-        nxnSwitch.switchOff((char*)homecode.c_str(),(char*)socket.c_str());
+        //Send 5 times
+        for (int i = 0; i <= 4; i++) {
+          nxnSwitch.switchOff((char*)homecode.c_str(),(char*)socket.c_str());
+          delay(50);
+        }
         Serial.println("OFF - " + homecode + " " + socket);
       }else if(onORoff == "1") {
-        nxnSwitch.switchOn((char*)homecode.c_str(),(char*)socket.c_str());
+        for (int i = 0; i <= 4; i++) {
+           nxnSwitch.switchOn((char*)homecode.c_str(),(char*)socket.c_str());
+        }
         Serial.println("ON - " + homecode + " " + socket);
       }
 
