@@ -17,6 +17,7 @@
 #include <WiFi.h>
 #include <ETH.h>
 
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
 #include <ArduinoJson.h>
 
 // SETUP vars
@@ -157,6 +158,13 @@ void MQTT_PublishAlive()
     }
 }
 
+// JSON - Deserialize Vars
+bool state;
+char* homecode;
+char* socket;
+const char* jsonClients[48];
+//# ### #
+
 void MQTT_OnReceive(String& topic, String& payload) {
 
     Serial.println("Received MQTT");
@@ -167,25 +175,24 @@ void MQTT_OnReceive(String& topic, String& payload) {
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, payload);
 
-    bool state = doc["state"];
-    String homecode = doc["homecode"];
-    String socket = doc["socket"];
-    const char * clients[48];
+    state = doc["state"];
+    homecode = doc["homecode"];
+    socket = doc["socket"];
 
     int arraySize = doc["clients"].size();
 
    for (int i = 0; i < arraySize; i++) {
 
-        clients[i] = doc["clients"][i];
+        jsonClients[i] = doc["clients"][i];
     }
 
     Serial.println("State:" + String(state));
-    Serial.println("HomeCode:" + homecode);
-    Serial.println("Socket:" + socket);
+    Serial.println("HomeCode:" + String(homecode));
+    Serial.println("Socket:" + String(socket));
     Serial.println("ASize:" + String(arraySize));
-    Serial.println("Array0:" + String(clients[0]));
+    Serial.println("Array0:" + String(jsonClients[0]));
 
-    if (arraySize > 0 && KeyWordComparison(clients, arraySize, clientID))
+    if (arraySize > 0 && KeyWordComparison(jsonClients, arraySize, clientID))
     {
         Serial.println("Yes ME!");
     }
