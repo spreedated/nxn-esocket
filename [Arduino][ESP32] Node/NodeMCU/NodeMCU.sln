@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NodeMCU", "NodeMCU\NodeMCU.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MQTT-2.4.8", "C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems", "{AA788767-885A-41E3-877E-54B7BAFB0867}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArduinoJson-6.17.2", "C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems", "{F613FDD8-FBD4-4007-8FE2-F4785D91269D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rc-switch-2.6.4", "C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems", "{88B28D0D-FAFA-445C-80C2-86EC3FB7D6C1}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems*{88b28d0d-fafa-445c-80c2-86ec3fb7d6c1}*SharedItemsImports = 9
+		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{aa788767-885a-41e3-877e-54b7bafb0867}*SharedItemsImports = 9
+		C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems*{f613fdd8-fbd4-4007-8fe2-f4785d91269d}*SharedItemsImports = 9
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
+		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2EE486A3-3B92-4209-B5DC-DFDB3E2E0DA8}
+	EndGlobalSection
+EndGlobal
