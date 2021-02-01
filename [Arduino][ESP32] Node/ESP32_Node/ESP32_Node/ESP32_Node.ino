@@ -5,7 +5,6 @@
 
 #include <WiFiClientSecure.h>
 #include <ssl_client.h>
-#include <WiFiUdp.h>
 #include <WiFiType.h>
 #include <WiFiSTA.h>
 #include <WiFiServer.h>
@@ -13,16 +12,18 @@
 #include <WiFiMulti.h>
 #include <WiFiGeneric.h>
 #include <WiFiClient.h>
-#include <WiFiAP.h>
 #include <WiFi.h>
 #include <ETH.h>
 
-#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_STD_STREAM 0 //Resolves VMciro IntelliSense Error
 #include <ArduinoJson.h>
 
 // SETUP vars
 // ----------
 // 2019-2021 (c) neXn-Systems
+
+//Node Information
+const char* nodeVersion = "5.0";
 
 //Connect to WiFi
 const char* ssid = "nxn-fritz";
@@ -31,20 +32,24 @@ const char* password = "69469573606998461850";
 //Node Ethernet Information
 const char* nodeHostname = "nxn-nodeESP32-95";
 const String nodeIP = "192.168.1.95";
-const int nodePort = 13337;
-const String inetDNSServer = "192.168.1.105";
+const String inetDNSServer = "192.168.1.254";
 const String inetGateway = "192.168.1.254";
 const String inetSubnet = "255.255.255.0";
-const String nodeVersion = "5.0";
+
+//MQTT
+const char* mqtt_server = "192.168.1.106";
+const char* nodeTopic = "/neXn/433/nodes/";
+const char* commandTopic = "/neXn/433/commands/";
+const char* mqtt_username = "cdavid";
+const char* mqtt_password = "cdavid";
+const char* clientID = "node1";
+const char* capabilities[] = { "433", "WLAN", "MQTT" };
 
 //433 Switch DataPin
 const int trasmitterDataPin = 32;
 
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//GetValue function
-//-------------------------------------------------------------------------
-String getValue(String data, char separator, int index)
+#pragma region  Helper Functions
+String SplitStringValue(String data, char separator, int index)
 {
     int found = 0;
     int strIndex[] = { 0, -1 };
@@ -60,59 +65,19 @@ String getValue(String data, char separator, int index)
 
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
+#pragma endregion
 
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//Split String function
-//-------------------------------------------------------------------------
-void SendUDPMessage(char * msg, WiFiUDP *listener)
-{
-    uint8_t replyPacket[200];
-
-    for (size_t i = 0; i < sizeof(msg)/sizeof(msg[0]); i++)
-    {
-        replyPacket[i] = (uint8_t)msg[i];
-    }
-
-    listener->beginPacket(listener->remoteIP(), listener->remotePort());
-    listener->write(replyPacket, (sizeof(replyPacket) / sizeof(replyPacket[0])));
-    listener->endPacket();
-    delay(50);
-    listener->stop();
-    listener->begin(nodePort);
-}
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-const IPAddress nodeIPa = IPAddress(getValue(nodeIP, '.', 0).toInt(), getValue(nodeIP, '.', 1).toInt(), getValue(nodeIP, '.', 2).toInt(), getValue(nodeIP, '.', 3).toInt());
-const IPAddress inetDNSServerA = IPAddress(getValue(inetDNSServer, '.', 0).toInt(), getValue(inetDNSServer, '.', 1).toInt(), getValue(inetDNSServer, '.', 2).toInt(), getValue(inetDNSServer, '.', 3).toInt());
-const IPAddress inetGatewayA = IPAddress(getValue(inetGateway, '.', 0).toInt(), getValue(inetGateway, '.', 1).toInt(), getValue(inetGateway, '.', 2).toInt(), getValue(inetGateway, '.', 3).toInt());
-const IPAddress inetSubnetA = IPAddress(getValue(inetSubnet, '.', 0).toInt(), getValue(inetSubnet, '.', 1).toInt(), getValue(inetSubnet, '.', 2).toInt(), getValue(inetSubnet, '.', 3).toInt());
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
+//IPAddress from String
+const IPAddress nodeIPa = IPAddress(SplitStringValue(nodeIP, '.', 0).toInt(), SplitStringValue(nodeIP, '.', 1).toInt(), SplitStringValue(nodeIP, '.', 2).toInt(), SplitStringValue(nodeIP, '.', 3).toInt());
+const IPAddress inetDNSServerA = IPAddress(SplitStringValue(inetDNSServer, '.', 0).toInt(), SplitStringValue(inetDNSServer, '.', 1).toInt(), SplitStringValue(inetDNSServer, '.', 2).toInt(), SplitStringValue(inetDNSServer, '.', 3).toInt());
+const IPAddress inetGatewayA = IPAddress(SplitStringValue(inetGateway, '.', 0).toInt(), SplitStringValue(inetGateway, '.', 1).toInt(), SplitStringValue(inetGateway, '.', 2).toInt(), SplitStringValue(inetGateway, '.', 3).toInt());
+const IPAddress inetSubnetA = IPAddress(SplitStringValue(inetSubnet, '.', 0).toInt(), SplitStringValue(inetSubnet, '.', 1).toInt(), SplitStringValue(inetSubnet, '.', 2).toInt(), SplitStringValue(inetSubnet, '.', 3).toInt());
 
 //RCSwitch
 RCSwitch nxnSwitch = RCSwitch();
 //# ### #
 
-//UDP Listener
-WiFiUDP UDPListener;
-// # ### #
-
-
 #pragma region MQTT Functions
-const char* mqtt_server = "192.168.1.106";  // IP of the MQTT broker
-const char* nodeTopic = "/neXn/433/nodes/";
-const char* commandTopic = "/neXn/433/commands/";
-const char* mqtt_username = "cdavid"; // MQTT username
-const char* mqtt_password = "cdavid"; // MQTT password
-const char* clientID = "node1"; // MQTT client ID
-const char* capabilities[] = { "433", "WLAN", "MQTT" };
-
 unsigned long lastMillis = 0;
 MQTTClient client;
 WiFiClient net;
@@ -127,12 +92,17 @@ void MQTT_Begin()
 
     if (client.connected())
     {
-        Serial.println("Connected to MQTT :)");
+        Serial.print("| [MQTT] Connected to MQTT Broker -");
+        Serial.print(mqtt_server);
+        Serial.println("-");
         client.subscribe(commandTopic);
+        Serial.print("| [MQTT] Subscribed to Topic -");
+        Serial.print(commandTopic);
+        Serial.println("-");
     }
     else
     {
-        Serial.println("MQTT connection failed ;( -- " + String(client.lastError()));
+        Serial.println("| [MQTT] Connection failed -- " + String(client.lastError()));
     }
 }
 
@@ -142,15 +112,15 @@ void MQTT_Publish(String msg)
     {
         client.connect(clientID);
         delay(10);
-        client.publish(nodeTopic, msg);
+        client.publish(nodeTopic, msg, false, 1);
     }
 }
 
 void MQTT_PublishAlive()
 {
-    if (millis() - lastMillis > 1000) {
+    if (millis() - lastMillis > 10000) {
         if (!client.connected()) {
-            Serial.print("lastError: ");
+            Serial.print("| [MQTT] LastError: ");
             Serial.println(client.lastError());
         }
         lastMillis = millis();
@@ -159,18 +129,20 @@ void MQTT_PublishAlive()
 }
 
 // JSON - Deserialize Vars
-bool state;
-char* homecode;
-char* socket;
 const char* jsonClients[48];
+const char* command;
+bool state;
+const char* homecode;
+const char* socket;
 //# ### #
 
-void MQTT_OnReceive(String& topic, String& payload) {
-
-    Serial.println("Received MQTT");
-    Serial.println("--------------");
-    Serial.println("Topic: " + topic);
-    Serial.println("Payload: " + payload);
+void MQTT_OnReceive(String& topic, String& payload) 
+{
+    Serial.print("| [MQTT] Message Received - Topic \"");
+    Serial.print(topic);
+    Serial.print("\" - Payload \"");
+    Serial.print(payload);
+    Serial.println("\"");
 
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, payload);
@@ -211,37 +183,107 @@ bool KeyWordComparison(const char * haystack[], int sizeOfHaystack, const char *
 }
 #pragma endregion
 
-String readUDPPacket() {
-    char data[255] = {};
-
-    int packetSize = UDPListener.parsePacket();
-
-    if (packetSize != 0) // if(packetsize)
-    {
-        Serial.println("// ---------------------------- //");
-        Serial.println(UDPListener.available());
-        Serial.println("// Package RCVD");
-        Serial.println("// IP  : " + UDPListener.remoteIP().toString());
-        Serial.print("// PORT: ");
-        Serial.println(UDPListener.remotePort());
-        Serial.println("// ---------------------------- //");
-        Serial.println("// -----------Content---------- //");
-
-        int len = UDPListener.read(data, 255);
-
-        if (len > 0) {
-            data[len] = 0;
-        }
-
-        Serial.println(data);
-        Serial.println("// ---------------------------- //\n");
-
-        return String(data);
-    }
-
-    return "";
+#pragma region Command routines
+void Command_Reset() 
+{
+    //if (String(rcvd) == "nxn#reset") {
+    //    //Answer
+    //    Serial.println("Restarting device...");
+    //    SendUDPMessage("Restarting device...", &UDPListener);
+    //    UDPListener.stop();
+    //    //# ### #
+    //    Serial.println("5 seconds...");
+    //    delay(1000);
+    //    Serial.println("4 seconds...");
+    //    delay(1000);
+    //    Serial.println("3 seconds...");
+    //    delay(1000);
+    //    Serial.println("2 seconds...");
+    //    delay(1000);
+    //    Serial.println("1 seconds...");
+    //    delay(1000);
+    //    Serial.println("Restarting... please stand by.");
+    //    ESP.restart();
+    //}
 }
 
+bool Command_IsOriginal() 
+{
+    //if (rcvd.startsWith("nxn#") && rcvd.length() > 4) {
+    //    int dividend = SplitStringValue(rcvd, '#', 1).toInt();
+    //    int divisor = SplitStringValue(rcvd, '#', 2).toInt();
+    //    if (dividend % divisor == 1337) { //nxn#2675#1338
+    //        char buf[100];
+    //        strcpy(buf, nodeHostname);
+    //        strcpy(buf, " operating on nominal parameters");
+    //        Serial.println("Genuine neXn-Systems device.");
+    //        //Serial.println(buf);
+    //        Serial.println("Firmware Version: " + nodeVersion);
+    //        Serial.println(UDPListener.remoteIP());
+    //        Serial.println(UDPListener.remotePort());
+    //        //Answer
+    //        //SendUDPMessage("Genuine neXn-Systems device#" + nodeVersion, &UDPListener);
+    //        //# ### #
+    //        return;
+    //    }
+    //}
+}
+
+void Command_SwitchSocket()
+{
+    //String homecode = SplitStringValue(String(rcvd), '#', 0);
+    //String socket = SplitStringValue(String(rcvd), '#', 1);
+    //String onORoff = SplitStringValue(String(rcvd), '#', 2);
+
+    ////Legacy
+    //if (socket == "1") {
+    //    socket = "10000";
+    //}
+    //if (socket == "2") {
+    //    socket = "01000";
+    //}
+    //if (socket == "3") {
+    //    socket = "00100";
+    //}
+    //if (socket == "4") {
+    //    socket = "00010";
+    //}
+    //if (socket == "5") {
+    //    socket = "00001";
+    //}
+    ////# ### #
+
+    //if (onORoff == "0") {
+    //    //SendUDPMessage("OFF#" + homecode + "#" + socket, &UDPListener);
+    //    //Send 5 times
+    //    for (int i = 0; i <= 4; i++) {
+    //        nxnSwitch.switchOff((char*)homecode.c_str(), (char*)socket.c_str());
+    //        delay(50);
+    //    }
+    //    Serial.println("OFF - " + homecode + " " + socket);
+    //}
+    //else if (onORoff == "1") {
+    //    //SendUDPMessage("ON#" + homecode + "#" + socket, &UDPListener);
+    //    for (int i = 0; i <= 4; i++) {
+    //        nxnSwitch.switchOn((char*)homecode.c_str(), (char*)socket.c_str());
+    //        delay(50);
+    //    }
+    //    Serial.println("ON - " + homecode + " " + socket);
+    //}
+}
+#pragma endregion
+
+#pragma region  WiFi Handling
+void WiFiSetup()
+{
+    Serial.printf("| [WiFi] Connecting to %s ", ssid);
+    WiFi.mode(WIFI_STA);
+    WiFi.config(nodeIPa, inetDNSServerA, inetGatewayA, inetSubnetA);
+    WiFi.setAutoReconnect(true);
+    WiFi.begin(ssid, password);
+    WiFi.setHostname(nodeHostname); //Set Hostname AFTER WiFi.begin();
+    WiFiConnect();
+}
 int wifiRetries = 0;
 void WiFiConnect()
 {
@@ -264,28 +306,20 @@ void WiFiReconnect()
     WiFi.reconnect();
     WiFiConnect();
 }
+#pragma endregion
 
 void setup() {
     Serial.begin(115200);
     while (!Serial) {
-        ; // wait for serial port to connect. Needed for native USB port only
+        ; // wait for serial port to connect.
     }
-    Serial.println("Welcome to the neXn-Systems NodeMCU v" + nodeVersion);
+    Serial.print("Welcome to the neXn-Systems NodeMCU v");
+    Serial.println(nodeVersion);
+    Serial.println("| [NodeInfo] Node MAC: " + WiFi.macAddress());
+    Serial.println("| [NodeInfo] Node IP: " + nodeIP);
 
     //WiFi Connection
-    Serial.println("Node MAC: " + WiFi.macAddress());
-    Serial.println("Node IP: " + nodeIP);
-    Serial.printf("Connecting to %s ", ssid);
-    WiFi.mode(WIFI_STA);
-    WiFi.config(nodeIPa, inetDNSServerA, inetGatewayA, inetSubnetA);
-    WiFi.setAutoReconnect(true);
-    WiFi.begin(ssid, password);
-    WiFi.setHostname(nodeHostname); //Set Hostname AFTER WiFi.begin();
-    WiFiConnect();
-    //# ### #
-
-    //UDP Listener
-    UDPListener.begin(nodePort);
+    WiFiSetup();
     //# ### #
 
     //RCSwitch
@@ -308,95 +342,6 @@ void loop() {
     }
 
     MQTT_PublishAlive();
-
-    String rcvd = readUDPPacket();
-
-    if (rcvd == "") {
-        return;
-    }
-
-    Serial.print("T: ");
-    Serial.print(rcvd);
-    Serial.print("\n");
-
-    if (String(rcvd) == "nxn#reset") {
-        //Answer
-        Serial.println("Restarting device...");
-        SendUDPMessage("Restarting device...", &UDPListener);
-        UDPListener.stop();
-        //# ### #
-        Serial.println("5 seconds...");
-        delay(1000);
-        Serial.println("4 seconds...");
-        delay(1000);
-        Serial.println("3 seconds...");
-        delay(1000);
-        Serial.println("2 seconds...");
-        delay(1000);
-        Serial.println("1 seconds...");
-        delay(1000);
-        Serial.println("Restarting... please stand by.");
-        ESP.restart();
-    }
-
-    if (rcvd.startsWith("nxn#") && rcvd.length() > 4) {
-        int dividend = getValue(rcvd, '#', 1).toInt();
-        int divisor = getValue(rcvd, '#', 2).toInt();
-        if (dividend % divisor == 1337) { //nxn#2675#1338
-            char buf[100];
-            strcpy(buf, nodeHostname);
-            strcpy(buf, " operating on nominal parameters");
-            Serial.println("Genuine neXn-Systems device.");
-            //Serial.println(buf);
-            Serial.println("Firmware Version: " + nodeVersion);
-            Serial.println(UDPListener.remoteIP());
-            Serial.println(UDPListener.remotePort());
-            //Answer
-            //SendUDPMessage("Genuine neXn-Systems device#" + nodeVersion, &UDPListener);
-            //# ### #
-            return;
-        }
-    }
-
-    String homecode = getValue(String(rcvd), '#', 0);
-    String socket = getValue(String(rcvd), '#', 1);
-    String onORoff = getValue(String(rcvd), '#', 2);
-
-    //Legacy
-    if (socket == "1") {
-        socket = "10000";
-    }
-    if (socket == "2") {
-        socket = "01000";
-    }
-    if (socket == "3") {
-        socket = "00100";
-    }
-    if (socket == "4") {
-        socket = "00010";
-    }
-    if (socket == "5") {
-        socket = "00001";
-    }
-    //# ### #
-
-    if (onORoff == "0") {
-        //SendUDPMessage("OFF#" + homecode + "#" + socket, &UDPListener);
-        //Send 5 times
-        for (int i = 0; i <= 4; i++) {
-            nxnSwitch.switchOff((char*)homecode.c_str(), (char*)socket.c_str());
-            delay(50);
-        }
-        Serial.println("OFF - " + homecode + " " + socket);
-    }
-    else if (onORoff == "1") {
-        //SendUDPMessage("ON#" + homecode + "#" + socket, &UDPListener);
-        for (int i = 0; i <= 4; i++) {
-            nxnSwitch.switchOn((char*)homecode.c_str(), (char*)socket.c_str());
-            delay(50);
-        }
-        Serial.println("ON - " + homecode + " " + socket);
-    }
-
+ 
     delay(5); //Small delay
 }
