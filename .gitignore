@@ -386,3 +386,4 @@ MigrationBackup/
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,windows
 
 __vm/
+config.h
