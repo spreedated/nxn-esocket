@@ -11,14 +11,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rc-switch-2.6.3", "C:\Users
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WiFiClientSecure-1.0", "C:\Users\SpReeD\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.4\libraries\WiFiClientSecure\WiFiClientSecure-1.0.vcxitems", "{47807A32-DD69-4B78-814D-BFB99983A512}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MQTT-2.4.8", "C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems", "{AA788767-885A-41E3-877E-54B7BAFB0867}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArduinoJson-6.17.2", "C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems", "{F613FDD8-FBD4-4007-8FE2-F4785D91269D}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		C:\Users\SpReeD\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.4\libraries\WiFi\WiFi-1.0.vcxitems*{17a4c1bc-7d9a-4bdd-b1e4-c19af9741fed}*SharedItemsImports = 9
 		C:\Users\SpReeD\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.4\libraries\WiFiClientSecure\WiFiClientSecure-1.0.vcxitems*{47807a32-dd69-4b78-814d-bfb99983a512}*SharedItemsImports = 9
 		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.3.vcxitems*{7d190b7a-7cd5-4085-9fd6-f4510f49253b}*SharedItemsImports = 9
+		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{aa788767-885a-41e3-877e-54b7bafb0867}*SharedItemsImports = 9
 		C:\Users\SpReeD\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.4\libraries\WiFiClientSecure\WiFiClientSecure-1.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		C:\Users\SpReeD\AppData\Local\arduino15\packages\esp32\hardware\esp32\1.0.4\libraries\WiFi\WiFi-1.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.3.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems*{f613fdd8-fbd4-4007-8fe2-f4785d91269d}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -26,7 +34,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
