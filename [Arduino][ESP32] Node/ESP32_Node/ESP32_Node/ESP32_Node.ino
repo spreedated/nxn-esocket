@@ -44,10 +44,10 @@ String SplitStringValue(String data, char separator, int index)
 #pragma endregion
 
 //IPAddress from String
-const IPAddress nodeIPa = IPAddress(SplitStringValue(WiFi_IP, '.', 0).toInt(), SplitStringValue(WiFi_IP, '.', 1).toInt(), SplitStringValue(WiFi_IP, '.', 2).toInt(), SplitStringValue(WiFi_IP, '.', 3).toInt());
+const IPAddress WiFi_IPA = IPAddress(SplitStringValue(WiFi_IP, '.', 0).toInt(), SplitStringValue(WiFi_IP, '.', 1).toInt(), SplitStringValue(WiFi_IP, '.', 2).toInt(), SplitStringValue(WiFi_IP, '.', 3).toInt());
 const IPAddress WiFi_DNSServerA = IPAddress(SplitStringValue(WiFi_DNSServer, '.', 0).toInt(), SplitStringValue(WiFi_DNSServer, '.', 1).toInt(), SplitStringValue(WiFi_DNSServer, '.', 2).toInt(), SplitStringValue(WiFi_DNSServer, '.', 3).toInt());
-const IPAddress inetGatewayA = IPAddress(SplitStringValue(WiFi_Gateway, '.', 0).toInt(), SplitStringValue(WiFi_Gateway, '.', 1).toInt(), SplitStringValue(WiFi_Gateway, '.', 2).toInt(), SplitStringValue(WiFi_Gateway, '.', 3).toInt());
-const IPAddress inetSubnetA = IPAddress(SplitStringValue(WiFi_Subnet, '.', 0).toInt(), SplitStringValue(WiFi_Subnet, '.', 1).toInt(), SplitStringValue(WiFi_Subnet, '.', 2).toInt(), SplitStringValue(WiFi_Subnet, '.', 3).toInt());
+const IPAddress WiFi_GatewayA = IPAddress(SplitStringValue(WiFi_Gateway, '.', 0).toInt(), SplitStringValue(WiFi_Gateway, '.', 1).toInt(), SplitStringValue(WiFi_Gateway, '.', 2).toInt(), SplitStringValue(WiFi_Gateway, '.', 3).toInt());
+const IPAddress WiFi_SubnetA = IPAddress(SplitStringValue(WiFi_Subnet, '.', 0).toInt(), SplitStringValue(WiFi_Subnet, '.', 1).toInt(), SplitStringValue(WiFi_Subnet, '.', 2).toInt(), SplitStringValue(WiFi_Subnet, '.', 3).toInt());
 
 //RCSwitch
 RCSwitch nxnSwitch = RCSwitch();
@@ -259,7 +259,7 @@ void WiFiSetup()
 {
     Serial.printf("| [WiFi] Connecting to %s ", WiFi_SSID);
     WiFi.mode(WIFI_STA);
-    WiFi.config(nodeIPa, WiFi_DNSServerA, inetGatewayA, inetSubnetA);
+    WiFi.config(WiFi_IPA, WiFi_DNSServerA, WiFi_GatewayA, WiFi_SubnetA);
     WiFi.setAutoReconnect(true);
     WiFi.begin(WiFi_SSID, WiFi_Password);
     WiFi.setHostname(WiFi_Hostname); //Set Hostname AFTER WiFi.begin();
