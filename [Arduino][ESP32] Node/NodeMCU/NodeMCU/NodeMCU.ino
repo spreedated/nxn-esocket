@@ -28,7 +28,11 @@
 // 2019-2021 (c) neXn-Systems
 
 //Node Information
-const char* nodeVersion = "5.0";
+#if defined (_DEBUG)
+const char* nodeVersion = "5.3-DEBUG";
+#else
+const char* nodeVersion = "5.3";
+#endif
 
 #pragma region  Helper Functions
 String SplitStringValue(String data, char separator, int index)
@@ -46,6 +50,13 @@ String SplitStringValue(String data, char separator, int index)
     }
 
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+String IpAddress2String(const IPAddress& ipAddress)
+{
+    return String(ipAddress[0]) + String(".") + \
+        String(ipAddress[1]) + String(".") + \
+        String(ipAddress[2]) + String(".") + \
+        String(ipAddress[3]);
 }
 #pragma endregion
 
@@ -88,13 +99,13 @@ void MQTT_Begin()
     }
 }
 
-void MQTT_Publish(String msg)
+void MQTT_Publish(String msg, const char * topic = nodeTopic)
 {
-    if (!client.publish(nodeTopic, msg))
+    if (!client.publish(topic, msg))
     {
         client.connect(clientID);
         delay(10);
-        client.publish(nodeTopic, msg, false, 1);
+        client.publish(topic, msg, false, 1);
     }
 }
 
@@ -185,6 +196,11 @@ void MQTT_OnReceive(String& topic, String& payload)
         Command_IsGenuine(genuineNum1, genuineNum2);
         return;
     }
+    if (String(command) == "info" || String(command) == "information")
+    {
+        Command_Info();
+        return;
+    }
 
     Serial.println("| [MQTT] Unknown command or command missing parameters");
 }
@@ -203,6 +219,46 @@ bool KeyWordComparison(const char * haystack[], int sizeOfHaystack, const char *
 #pragma endregion
 
 #pragma region Command routines
+void Command_Info()
+{
+    Serial.println("| [MQTT] Executing Command \"Info\"");
+
+    const int capacity = JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(5) + 4 * JSON_OBJECT_SIZE(1);
+    StaticJsonDocument<capacity> doc;
+
+    doc["firmware"] = nodeVersion;
+    doc["mac"] = WiFi.macAddress();
+    doc["clientID"] = clientID;
+
+    JsonObject jWifi = doc.createNestedObject("wifi");
+    jWifi["assignedIPv4"] = IpAddress2String(WiFi_IPA);
+    jWifi["connectedSSID"] = WiFi.SSID();
+    jWifi["signalStrengh"] = WiFi.RSSI();
+
+    JsonObject jHardware = doc.createNestedObject("hardware");
+#if defined (ESP32)
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    jHardware["cpuFreq"] = getCpuFrequencyMhz();
+    jHardware["cores"] = chip_info.cores;
+    jHardware["model"] = chip_info.model;
+    jHardware["revision"] = chip_info.revision;
+#elif defined (ESP8266)
+    jHardware["chipID"] = ESP.getFlashChipId();
+    jHardware["chipRealSize"] = ESP.getFlashChipRealSize();
+    jHardware["chipSize"] = ESP.getFlashChipSize();
+    jHardware["chipMode"] = ESP.getFlashChipMode();
+#endif
+
+    JsonObject jRCSwitch = doc.createNestedObject("rcswitch");
+    jRCSwitch["dataPin"] = trasmitterDataPin;
+
+    String JSON;
+    serializeJson(doc, JSON);
+
+    MQTT_Publish(JSON);
+}
+
 void Command_Reset() 
 {
     Serial.println("| [MQTT] Executing Command \"Restart\"");
