@@ -419,7 +419,7 @@ void setup() {
     //OTA Update
     ArduinoOTA.setPort(3232);
     ArduinoOTA.setHostname(clientID);
-    ArduinoOTA.setPassword("18715");
+    ArduinoOTA.setPasswordHash("1c9fcae7146273d7443f5b7eac02d56d");
     StartOTA();
     //# ### #
 }
