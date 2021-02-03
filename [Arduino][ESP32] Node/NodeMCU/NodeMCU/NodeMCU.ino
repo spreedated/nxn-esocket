@@ -417,9 +417,16 @@ void setup() {
     MQTT_Begin();
 
     //OTA Update
-    ArduinoOTA.setPort(3232);
+    ArduinoOTA.setPort(otaPort);
     ArduinoOTA.setHostname(clientID);
-    ArduinoOTA.setPasswordHash("1c9fcae7146273d7443f5b7eac02d56d");
+    if (strlen(otaMD5Password) > 0)
+    {
+        ArduinoOTA.setPasswordHash(otaMD5Password);
+    }
+    else if (strlen(otaPassword) > 0)
+    {
+        ArduinoOTA.setPassword(otaPassword);
+    }
     StartOTA();
     //# ### #
 }

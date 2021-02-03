@@ -19,11 +19,17 @@ const char* mqtt_username = "";
 const char* mqtt_password = "";
 const char* clientID = "node1";
 const char* capabilities[] = { "433", "WLAN", "MQTT" };
-const char* commandlist[] = { "reset", "restart", "switch", "socket", "genuine", "original" };
+const char* commandlist[] = { "reset", "restart", "switch", "socket", "genuine", "original", "info", "information" };
 //# ### #
 
 //433 Switch DataPin
 const int trasmitterDataPin = 32;
+//# ### #
+
+//ArduinoOTA
+const int otaPort = 3232;
+const char* otaPassword = "";
+const char* otaMD5Password = "";
 //# ### #
 
 #endif // !CONFIG_H
