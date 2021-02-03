@@ -17,8 +17,8 @@ const char* nodeTopic = "/neXn/433/nodes/";
 const char* commandTopic = "/neXn/433/commands/";
 const char* mqtt_username = "";
 const char* mqtt_password = "";
-const char* clientID = "node1";
-const char* capabilities[] = { "433", "WLAN", "MQTT" };
+const char* clientID = "testNode";
+const char* capabilities[] = { "433", "WLAN", "MQTT", "OTA" };
 const char* commandlist[] = { "reset", "restart", "switch", "socket", "genuine", "original", "info", "information" };
 //# ### #
 
