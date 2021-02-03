@@ -6,7 +6,8 @@
 #include <RCSwitch.h>
 
 #if defined(ESP32)
-#include "config.h"
+//#include "config.h"
+#include "config_nodemcu_ESP32_testNode2.h"
 #include <WiFiClientSecure.h>
 #include <ssl_client.h>
 #include <WiFiType.h>
@@ -19,7 +20,7 @@
 #include <WiFi.h>
 #include <ETH.h>
 #elif defined(ESP8266)
-#include "config_nodemcu_107.h"
+#include "config_nodemcu_108.h"
 #include <ESP8266WiFi.h>
 #include <WiFiUDP.h>
 #endif

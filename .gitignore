@@ -387,4 +387,4 @@ MigrationBackup/
 
 __vm/
 config.h
-config_nodemcu_107.h
+config_nodemcu_*.h
