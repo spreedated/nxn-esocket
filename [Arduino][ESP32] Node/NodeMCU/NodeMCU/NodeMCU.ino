@@ -227,12 +227,18 @@ void Command_Info()
 {
     Serial.println("| [MQTT] Executing Command \"Info\"");
 
-    const int capacity = JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(5) + 4 * JSON_OBJECT_SIZE(1);
+    const int capacity = JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(10) + 4 * JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(5) + 4 * JSON_OBJECT_SIZE(1);
     StaticJsonDocument<capacity> doc;
 
     doc["firmware"] = nodeVersion;
     doc["mac"] = WiFi.macAddress();
     doc["clientID"] = clientID;
+
+    JsonArray Jcap = doc.createNestedArray("capabilities");
+    for (size_t i = 0; i < sizeof(capabilities)/sizeof(capabilities[0]); i++)
+    {
+        Jcap.add(capabilities[i]);
+    }
 
     JsonObject jWifi = doc.createNestedObject("wifi");
     jWifi["assignedIPv4"] = IpAddress2String(WiFi_IPA);
