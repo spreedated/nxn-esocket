@@ -2,7 +2,7 @@
 define('_company_','neXn-Systems');
 define('_homepage_','nexn.systems');
 define('_developer_','Markus Karl Wackermann');
-define('_version_','2.10.3');
+define('_version_','2.10.5');
 
 $starttime = microtime(true);
 
@@ -549,7 +549,7 @@ if (mysqli_num_rows($result) > 0) {
 echo 'Version ' . _version_ . '<br />';
 echo '<script>document.title = document.title + \' v\' + \''._version_.'\'</script>';
 ?>
-	2019 &copy; ne<span style="color:#44A601">X</span>n-Systems<br />
+	2019-2021 &copy; ne<span style="color:#44A601">X</span>n-Systems<br />
 	<?PHP $endtime = microtime(true); ?>
 	<span id="span_measurecreationtime"></span>
 	</p>
