@@ -20,11 +20,13 @@
   #include <WiFi.h>
   #include <ETH.h>
   #include <WebServer.h>
+  const char* deviceName = "ESP32";
 #elif defined(ESP8266)
   #include "config_nodemcu_107.h"
   #include <ESP8266WiFi.h>
   #include <WiFiUDP.h>
   #include <ESP8266WebServer.h>
+  const char* deviceName = "ESP8266";
 #endif
 
 #define ARDUINOJSON_ENABLE_STD_STREAM 0 //Resolves VMciro IntelliSense Error
@@ -36,9 +38,9 @@
 
 //Node Information
 #if defined (_DEBUG)
-const char* nodeVersion = "6.1-DEBUG";
+const char* nodeVersion = "6.2-DEBUG";
 #else
-const char* nodeVersion = "6.1";
+const char* nodeVersion = "6.2";
 #endif
 
 #pragma region  Helper Functions

@@ -42,5 +42,8 @@
     <ClInclude Include="config_nodemcu_109.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="webpage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
