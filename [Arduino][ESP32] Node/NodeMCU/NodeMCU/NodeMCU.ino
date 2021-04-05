@@ -6,37 +6,39 @@
 #include <RCSwitch.h>
 
 #if defined(ESP32)
-//#include "config.h"
-#include "config_nodemcu_ESP32_testNode2.h"
-#include <WiFiClientSecure.h>
-#include <ssl_client.h>
-#include <WiFiType.h>
-#include <WiFiSTA.h>
-#include <WiFiServer.h>
-#include <WiFiScan.h>
-#include <WiFiMulti.h>
-#include <WiFiGeneric.h>
-#include <WiFiClient.h>
-#include <WiFi.h>
-#include <ETH.h>
+  //#include "config.h"
+  #include "config_nodemcu_107.h"
+  #include <WiFiClientSecure.h>
+  #include <ssl_client.h>
+  #include <WiFiType.h>
+  #include <WiFiSTA.h>
+  #include <WiFiServer.h>
+  #include <WiFiScan.h>
+  #include <WiFiMulti.h>
+  #include <WiFiGeneric.h>
+  #include <WiFiClient.h>
+  #include <WiFi.h>
+  #include <ETH.h>
+  #include <WebServer.h>
 #elif defined(ESP8266)
-#include "config_nodemcu_108.h"
-#include <ESP8266WiFi.h>
-#include <WiFiUDP.h>
+  #include "config_nodemcu_107.h"
+  #include <ESP8266WiFi.h>
+  #include <WiFiUDP.h>
+  #include <ESP8266WebServer.h>
 #endif
 
 #define ARDUINOJSON_ENABLE_STD_STREAM 0 //Resolves VMciro IntelliSense Error
 #include <ArduinoJson.h>
 
-
+#include "webpage.h"
 
 // 2019-2021 (c) neXn-Systems
 
 //Node Information
 #if defined (_DEBUG)
-const char* nodeVersion = "5.3-DEBUG";
+const char* nodeVersion = "6.1-DEBUG";
 #else
-const char* nodeVersion = "5.3";
+const char* nodeVersion = "6.1";
 #endif
 
 #pragma region  Helper Functions
@@ -63,6 +65,15 @@ String IpAddress2String(const IPAddress& ipAddress)
         String(ipAddress[2]) + String(".") + \
         String(ipAddress[3]);
 }
+
+unsigned long interval = 3600000;
+void Restart24h()
+{
+    if (millis() >= interval)
+    {
+        ESP.restart();
+    }
+}
 #pragma endregion
 
 //IPAddress from String
@@ -73,6 +84,14 @@ const IPAddress WiFi_SubnetA = IPAddress(SplitStringValue(WiFi_Subnet, '.', 0).t
 
 //RCSwitch
 RCSwitch nxnSwitch = RCSwitch();
+//# ### #
+
+// Set web server port number to 80
+#if defined(ESP32)
+  WebServer server(80);
+#elif defined(ESP8266)
+  ESP8266WebServer server(80);
+#endif
 //# ### #
 
 #pragma region MQTT Functions
@@ -104,13 +123,16 @@ void MQTT_Begin()
     }
 }
 
-void MQTT_Publish(String msg, const char * topic = nodeTopic)
+void MQTT_Publish(String msg, const char * topic = commandResponseTopic)
 {
-    if (!client.publish(topic, msg))
+    //Serial.println(msg);
+    const char* tt = msg.c_str();
+
+    if (!client.publish(topic, tt, false, 1))
     {
         client.connect(clientID);
         delay(10);
-        client.publish(topic, msg, false, 1);
+        client.publish(topic, tt, false, 1);
     }
 }
 
@@ -122,7 +144,7 @@ void MQTT_PublishAlive()
             Serial.println(client.lastError());
         }
         lastMillis = millis();
-        MQTT_Publish("{\"client\":\"" + String(clientID) + "\"}");
+        MQTT_Publish("{\"client\":\"" + String(clientID) + "\", \"firmware\":\"" + String(nodeVersion) + "\"}", nodeTopic);
     }
 }
 
@@ -228,8 +250,7 @@ void Command_Info()
 {
     Serial.println("| [MQTT] Executing Command \"Info\"");
 
-    const int capacity = JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(10) + 4 * JSON_OBJECT_SIZE(3) + 4 * JSON_OBJECT_SIZE(5) + 4 * JSON_OBJECT_SIZE(1);
-    StaticJsonDocument<capacity> doc;
+    DynamicJsonDocument doc(1024);
 
     doc["firmware"] = nodeVersion;
     doc["mac"] = WiFi.macAddress();
@@ -242,7 +263,7 @@ void Command_Info()
     }
 
     JsonObject jWifi = doc.createNestedObject("wifi");
-    jWifi["assignedIPv4"] = IpAddress2String(WiFi_IPA);
+    jWifi["assignedIPv4"] = IpAddress2String(WiFi.localIP());
     jWifi["connectedSSID"] = WiFi.SSID();
     jWifi["signalStrengh"] = WiFi.RSSI();
 
@@ -266,6 +287,8 @@ void Command_Info()
 
     String JSON;
     serializeJson(doc, JSON);
+
+    Serial.println(JSON);
 
     MQTT_Publish(JSON);
 }
@@ -404,6 +427,14 @@ void StartOTA()
 }
 #pragma endregion
 
+#pragma WebServer
+void handle_OnConnect() {
+  server.send(200, "text/html", SendHTML());
+}
+void handle_NotFound(){
+  server.send(404, "text/plain", "Not found");
+}
+#pragma endregion
 
 void setup() {
     Serial.begin(115200);
@@ -439,9 +470,20 @@ void setup() {
     }
     StartOTA();
     //# ### #
+
+    //WebServer
+    server.on("/", handle_OnConnect);
+    server.onNotFound(handle_NotFound);
+    server.begin();
+    Serial.println("| [WebServer] HTTP server started");
+    //# ### #
 }
 
 void loop() {
+    server.handleClient();
+    
+    Restart24h();
+
     ArduinoOTA.handle();
 
     // MQTT loop
@@ -452,6 +494,11 @@ void loop() {
     if (wifistat == WL_DISCONNECTED || wifistat == WL_CONNECTION_LOST)
     {
         WiFiReconnect();
+    }
+
+    if (!client.connected())
+    {
+        ESP.restart();
     }
 
     MQTT_PublishAlive();

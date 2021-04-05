@@ -1,7 +1,7 @@
 apt-get update
-apt-get install git-core
+apt-get install git
 
-git clone git://git.drogon.net/wiringPi
+git clone https://github.com/WiringPi/WiringPi.git
 
 cd wiringPi
 ./build

@@ -39,5 +39,8 @@
     <ClInclude Include="config_nodemcu_ESP32_testNode2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="config_nodemcu_109.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
