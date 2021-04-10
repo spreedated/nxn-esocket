@@ -430,11 +430,26 @@ void StartOTA()
 #pragma endregion
 
 #pragma WebServer
-void handle_OnConnect() {
+void handle_OnConnect()
+{
+  Serial.println("Loading WebServer");
   server.send(200, "text/html", SendHTML());
+  Serial.println("Done WebServer");
+  Serial.println(server.client().remoteIP().toString());
 }
-void handle_NotFound(){
+void handle_NotFound()
+{
   server.send(404, "text/plain", "Not found");
+}
+void handle_switch()
+{
+    Serial.println("| [WebServer] POST - Method from " + server.client().remoteIP().toString());
+    if (server.hasArg("homecode") && server.hasArg("socket") && server.hasArg("state"))
+    {
+        server.send(200, "text/html", "<html>OK! - I got you!</html>");
+        Command_SwitchSocket(server.arg("homecode").c_str(), server.arg("socket").c_str(), server.arg("state").toInt());
+        //server.send(200, "text/html", SendHTML());
+    }
 }
 #pragma endregion
 
@@ -475,6 +490,7 @@ void setup() {
 
     //WebServer
     server.on("/", handle_OnConnect);
+    server.on("/switch", HTTP_POST, handle_switch);
     server.onNotFound(handle_NotFound);
     server.begin();
     Serial.println("| [WebServer] HTTP server started");

@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\arduino folders read me.txt">
-      <Filter>Misc Files</Filter>
-    </None>
     <None Include="config.h.example">
       <Filter>Header Files</Filter>
     </None>
     <None Include="NodeMCU.ino" />
+    <None Include="webpage.htm">
+      <Filter>Misc Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.NodeMCU.vsarduino.h">
