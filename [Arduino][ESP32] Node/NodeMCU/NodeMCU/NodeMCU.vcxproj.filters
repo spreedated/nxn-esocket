@@ -45,5 +45,13 @@
     <ClInclude Include="webpage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nxn_ntp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="nxn_ntp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,6 +5,9 @@
 
 #include <RCSwitch.h>
 
+#include <NTPClient.h>
+#include "nxn_ntp.h"
+  
 #if defined(ESP32)
   //#include "config.h"
   #include "config_nodemcu_107.h"
@@ -38,9 +41,9 @@
 
 //Node Information
 #if defined (_DEBUG)
-const char* nodeVersion = "6.2-DEBUG";
+const char* nodeVersion = "6.3-DEBUG";
 #else
-const char* nodeVersion = "6.2";
+const char* nodeVersion = "6.3";
 #endif
 
 #pragma region  Helper Functions
@@ -68,11 +71,12 @@ String IpAddress2String(const IPAddress& ipAddress)
         String(ipAddress[3]);
 }
 
-unsigned long interval = 3600000;
+unsigned long interval = 86400000;
 void Restart24h()
 {
     if (millis() >= interval)
     {
+        Serial.println("| [Sys] 24h restart...");
         ESP.restart();
     }
 }
@@ -94,6 +98,12 @@ RCSwitch nxnSwitch = RCSwitch();
 #elif defined(ESP8266)
   ESP8266WebServer server(80);
 #endif
+//# ### #
+
+//NTP Client
+  WiFiUDP udp;
+  NTPClient ntp(udp, "de.pool.ntp.org", 3600, 60000);
+  String timeString;
 //# ### #
 
 #pragma region MQTT Functions
@@ -429,7 +439,7 @@ void StartOTA()
 }
 #pragma endregion
 
-#pragma WebServer
+#pragma region WebServer
 void handle_OnConnect()
 {
   Serial.println("Loading WebServer");
@@ -495,9 +505,21 @@ void setup() {
     server.begin();
     Serial.println("| [WebServer] HTTP server started");
     //# ### #
+
+    //NTP Client
+    ntp.begin();
+    ntp.update();
+    ntp.setTimeOffset(2*60*60);
+    //# ### #
 }
 
 void loop() {
+    timeString = ntp.getFormattedTime();
+    if (timeString.length() >= 1)
+    {
+        Serial.println(timeString);
+    }
+    
     server.handleClient();
     
     Restart24h();

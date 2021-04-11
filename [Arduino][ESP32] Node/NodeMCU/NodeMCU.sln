@@ -11,11 +11,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArduinoJson-6.17.2", "C:\Us
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rc-switch-2.6.4", "C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems", "{88B28D0D-FAFA-445C-80C2-86EC3FB7D6C1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NTPClient-3.2.0", "C:\Users\SpReeD\Documents\Arduino\libraries\NTPClient\NTPClient-3.2.0.vcxitems", "{C428D20A-56ED-4ED8-9BE1-D691A4AC221B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems*{88b28d0d-fafa-445c-80c2-86ec3fb7d6c1}*SharedItemsImports = 9
 		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{aa788767-885a-41e3-877e-54b7bafb0867}*SharedItemsImports = 9
+		C:\Users\SpReeD\Documents\Arduino\libraries\NTPClient\NTPClient-3.2.0.vcxitems*{c428d20a-56ed-4ed8-9be1-d691a4ac221b}*SharedItemsImports = 9
 		C:\Users\SpReeD\Documents\Arduino\libraries\MQTT\MQTT-2.4.8.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		C:\Users\SpReeD\Documents\Arduino\libraries\NTPClient\NTPClient-3.2.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		C:\Users\SpReeD\Documents\Arduino\libraries\rc-switch\rc-switch-2.6.4.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		C:\Users\SpReeD\Documents\Arduino\libraries\ArduinoJson\ArduinoJson-6.17.2.vcxitems*{f613fdd8-fbd4-4007-8fe2-f4785d91269d}*SharedItemsImports = 9
 	EndGlobalSection
