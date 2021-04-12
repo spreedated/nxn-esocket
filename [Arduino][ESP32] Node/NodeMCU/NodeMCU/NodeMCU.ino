@@ -5,7 +5,6 @@
 
 #include <RCSwitch.h>
 
-#include <NTPClient.h>
 #include "nxn_ntp.h"
   
 #if defined(ESP32)
@@ -41,9 +40,9 @@
 
 //Node Information
 #if defined (_DEBUG)
-const char* nodeVersion = "6.3-DEBUG";
+const char* nodeVersion = "6.5-DEBUG";
 #else
-const char* nodeVersion = "6.3";
+const char* nodeVersion = "6.5";
 #endif
 
 #pragma region  Helper Functions
@@ -71,12 +70,12 @@ String IpAddress2String(const IPAddress& ipAddress)
         String(ipAddress[3]);
 }
 
-unsigned long interval = 86400000;
-void Restart24h()
+unsigned long interval = 3600000;
+void Restart1h()
 {
     if (millis() >= interval)
     {
-        Serial.println("| [Sys] 24h restart...");
+        Serial.println("| [Sys] 1h restart...");
         ESP.restart();
     }
 }
@@ -102,7 +101,7 @@ RCSwitch nxnSwitch = RCSwitch();
 
 //NTP Client
   WiFiUDP udp;
-  NTPClient ntp(udp, "de.pool.ntp.org", 3600, 60000);
+  neXn_NTP ntp(udp);
   String timeString;
 //# ### #
 
@@ -507,14 +506,14 @@ void setup() {
     //# ### #
 
     //NTP Client
-    ntp.begin();
+    /*ntp.begin();
     ntp.update();
-    ntp.setTimeOffset(2*60*60);
+    ntp.setTimeOffset(2*60*60);*/
     //# ### #
 }
 
 void loop() {
-    timeString = ntp.getFormattedTime();
+    timeString = ntp.Time;
     if (timeString.length() >= 1)
     {
         Serial.println(timeString);
@@ -522,7 +521,7 @@ void loop() {
     
     server.handleClient();
     
-    Restart24h();
+    Restart1h();
 
     ArduinoOTA.handle();
 
