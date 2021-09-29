@@ -4,8 +4,6 @@
 #include <MQTTClient.h>
 
 #include <RCSwitch.h>
-
-#include "nxn_ntp.h"
   
 #if defined(ESP32)
   //#include "config.h"
@@ -40,9 +38,9 @@
 
 //Node Information
 #if defined (_DEBUG)
-const char* nodeVersion = "6.5-DEBUG";
+const char* nodeVersion = "6.7-DEBUG";
 #else
-const char* nodeVersion = "6.5";
+const char* nodeVersion = "6.7";
 #endif
 
 #pragma region  Helper Functions
@@ -99,12 +97,6 @@ RCSwitch nxnSwitch = RCSwitch();
 #endif
 //# ### #
 
-//NTP Client
-  WiFiUDP udp;
-  neXn_NTP ntp(udp);
-  String timeString;
-//# ### #
-
 #pragma region MQTT Functions
 unsigned long lastMillis = 0;
 MQTTClient client;
@@ -112,7 +104,7 @@ WiFiClient net;
 
 void MQTT_Begin()
 {
-    client.setBufSize(1024);
+    client.setBufSize(2048);
 
     client.begin(mqtt_server, 1883, net);
     client.connect(clientID);
@@ -123,10 +115,15 @@ void MQTT_Begin()
         Serial.print("| [MQTT] Connected to MQTT Broker -");
         Serial.print(mqtt_server);
         Serial.println("-");
-        client.subscribe(commandTopic);
-        Serial.print("| [MQTT] Subscribed to Topic -");
-        Serial.print(commandTopic);
-        Serial.println("-");
+ 
+        for (size_t i = 0; i < sizeof(commandlist)/sizeof(commandlist[0]); i++)
+        {
+            String switchTopic = String(preifxTopic) + String(clientID) + "/" + String(commandlist[i]);
+            client.subscribe(switchTopic);
+            Serial.print("| [MQTT] Subscribed to Topic -");
+            Serial.print(switchTopic);
+            Serial.println("-");
+        }
     }
     else
     {
@@ -134,16 +131,18 @@ void MQTT_Begin()
     }
 }
 
-void MQTT_Publish(String msg, const char * topic = commandResponseTopic)
+void MQTT_Publish(String msg, const char * topic = NULL)
 {
-    //Serial.println(msg);
-    const char* tt = msg.c_str();
+    if (topic == NULL)
+    {
+        topic = (String(preifxTopic) + "response").c_str();
+    }
 
-    if (!client.publish(topic, tt, false, 1))
+    if (!client.publish(topic, msg, false, 0))
     {
         client.connect(clientID);
         delay(10);
-        client.publish(topic, tt, false, 1);
+        client.publish(topic, msg, false, 0);
     }
 }
 
@@ -159,88 +158,79 @@ void MQTT_PublishAlive()
     }
 }
 
-// JSON - Deserialize Vars
-const char* jsonClients[48];
-const char* command;
-bool state;
-const char* homecode;
-const char* socket;
-int genuineNum1;
-int genuineNum2;
-//# ### #
-
-void MQTT_ClearDVars()
+void MQTT_CommandSwitch(String& payload)
 {
-    for (size_t i = 0; i < sizeof(jsonClients)/sizeof(jsonClients[0]); i++)
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+    bool state;
+    const char* homecode;
+    const char* socket;
+    state = doc["state"];
+    homecode = doc["homecode"];
+    socket = doc["socket"];
+
+    if (homecode == NULL || homecode[0] == '\0')
     {
-        jsonClients[i] = NULL;
+        Serial.println("| [MQTT][CommandSwitch] Homecode was null");
+        return;
     }
-    command = "\0";
-    homecode = "\0";
-    socket = "\0";
-    state = 0;
-    genuineNum1 = 0;
-    genuineNum2 = 0;
+    if (socket == NULL || socket[0] == '\0')
+    {
+        Serial.println("| [MQTT][CommandSwitch] Socket was null");
+        return;
+    }
+
+    Command_SwitchSocket(homecode, socket, state);
+    return;
+}
+
+void MQTT_CommandGenuine(String& payload)
+{
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+    int genuineNum1;
+    int genuineNum2;
+    genuineNum1 = doc["gNum1"];
+    genuineNum2 = doc["gNum2"];
+
+    if (genuineNum1 == 0 || genuineNum2 == 0)
+    {
+        Serial.println("| [MQTT][CommandGenuine] Number was 0");
+        return;
+    }
+
+    Command_IsGenuine(genuineNum1, genuineNum2);
 }
 
 void MQTT_OnReceive(String& topic, String& payload) 
 {
-    MQTT_ClearDVars();
-
-    Serial.print("| [MQTT] Message Received - Topic \"");
+    Serial.print("| [MQTT][OnReceive] Message Received - Topic \"");
     Serial.print(topic);
     Serial.print("\" - Payload \"");
     Serial.print(payload);
     Serial.println("\"");
 
-    //De-Serialize
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, payload);
-
-    int arraySize = doc["clients"].size();
-
-    for (int i = 0; i < arraySize; i++) {
-
-        jsonClients[i] = doc["clients"][i];
-    }
-
-    if (arraySize <= 0 || !KeyWordComparison(jsonClients, arraySize, clientID)) //Is this message for us?
+    //Select Command channel
+    if (topic.endsWith("switch") || topic.endsWith("socket"))
     {
-        Serial.println("| [MQTT] Message not for me, won't process.");
-        return;
+        MQTT_CommandSwitch(payload);
     }
-
-    state = doc["state"];
-    homecode = doc["homecode"];
-    socket = doc["socket"];
-    command = doc["command"];
-    genuineNum1 = doc["gNum1"];
-    genuineNum2 = doc["gNum2"];
-    //# ### #
-
-    //Process commands
-    if (String(command) == "switch" || String(command) == "socket")
-    {
-        Command_SwitchSocket(homecode, socket, state);
-        return;
-    }
-    if (String(command) == "reset" || String(command) == "restart")
+    if (topic.endsWith("reset") || topic.endsWith("restart"))
     {
         Command_Reset();
-        return;
     }
-    if ((String(command) == "original" || String(command) == "genuine") && genuineNum1 != 0 && genuineNum2 != 0)
+    if (topic.endsWith("original") || topic.endsWith("genuine"))
     {
-        Command_IsGenuine(genuineNum1, genuineNum2);
-        return;
+        MQTT_CommandGenuine(payload);
     }
-    if (String(command) == "info" || String(command) == "information")
+    if (topic.endsWith("info") || topic.endsWith("information"))
     {
         Command_Info();
-        return;
     }
 
-    Serial.println("| [MQTT] Unknown command or command missing parameters");
+    return;
 }
 
 bool KeyWordComparison(const char * haystack[], int sizeOfHaystack, const char * needle) 
@@ -301,7 +291,8 @@ void Command_Info()
 
     Serial.println(JSON);
 
-    MQTT_Publish(JSON);
+    //MQTT_Publish(JSON);
+    MQTT_Publish("{\"firmware\":\"6.7-DEBUG\",\"mac\":\"DC:4F:22:61:38:29\",\"clientID\":\"nxn-nodeMCU-107\",\"capabilities\":[\"433\",\"WLAN\",\"MQTT\",\"OTA\"],\"wifi\":{\"assignedIPv4\":\"192.168.1.107\",\"connectedSSID\":\"nxn-tplink\",\"signalStrengh\":-51},\"hardware\":{\"chipID\":1458280,\"chipRealSize\":4194304,\"chipSize\":4194304,\"chipMode\":2},\"rcswitch\":{\"dataPin\":0}");
 }
 
 void Command_Reset() 
@@ -326,7 +317,7 @@ bool Command_IsGenuine(int dividend, int divisor)
     if (dividend % divisor == 1337) { //nxn#2675#1338
         Serial.println("Genuine neXn-Systems device.");
         Serial.println("Firmware Version: " + String(nodeVersion));
-        MQTT_Publish("{\"client\":\"" + String(clientID) + "\", \"info\":\"Genuine neXn-Systems device\", \"firmware\":\"" + String(nodeVersion) + "\"}");
+        MQTT_Publish("{\"info\":\"Genuine neXn-Systems device\", \"firmware\":\"" + String(nodeVersion) + "\"}");
         return true;
     }
     return false;
@@ -504,21 +495,9 @@ void setup() {
     server.begin();
     Serial.println("| [WebServer] HTTP server started");
     //# ### #
-
-    //NTP Client
-    /*ntp.begin();
-    ntp.update();
-    ntp.setTimeOffset(2*60*60);*/
-    //# ### #
 }
 
 void loop() {
-    timeString = ntp.Time;
-    if (timeString.length() >= 1)
-    {
-        Serial.println(timeString);
-    }
-    
     server.handleClient();
     
     Restart1h();
